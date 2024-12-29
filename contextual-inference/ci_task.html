@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimental Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        var stim_dim_x = 50
+        var stim_dim_y = 50
+        var im1, im2, im3, im4, im5, im6
+
+        var rectangleGroup
+        var rectWidth = 80
+        var rectHeight = 80
+
+        class ExperimentScene extends Phaser.Scene {
+            constructor() {
+                super('ExperimentScene');
+            }
+
+            preload() {
+                // Preload assets
+                this.load.image('space', 'assets/bg2.jpg');
+                this.load.image('stim1', 'assets/diamond.png');
+                this.load.image('stim2', 'assets/starfish.png');
+                this.load.image('stim3', 'assets/tree.png');
+                this.load.image('stim4', 'assets/wood.png');
+                this.load.image('stim5', 'assets/stone.png');
+                this.load.image('stim6', 'assets/moon.png');
+                this.load.image('t1', 'assets/target1.png');
+                this.load.image('t2', 'assets/target2.png');
+            }
+
+            create() {
+                // Background setup
+                this.add.image(400, 300, 'space').setDisplaySize(800, 600);
+                
+                
+                im1 = this.add.image(100, 300, 'stim1').setDisplaySize(stim_dim_x, stim_dim_y);
+                im2 = this.add.image(200, 300, 'stim2').setDisplaySize(stim_dim_x, stim_dim_y);
+                im3 = this.add.image(300, 300, 'stim3').setDisplaySize(stim_dim_x, stim_dim_y);
+                im4 = this.add.image(400, 300, 'stim4').setDisplaySize(stim_dim_x, stim_dim_y);
+                im5 = this.add.image(500, 300, 'stim5').setDisplaySize(stim_dim_x, stim_dim_y);
+                im6 = this.add.image(600, 300, 'stim6').setDisplaySize(stim_dim_x, stim_dim_y);
+
+                rectangleGroup = this.add.group();
+                for (let y = 61; y <= 561; y += 100) {
+                    // Create a graphics object for the rectangle
+                    const graphics = this.add.graphics();
+                    //graphics.fillStyle(0x00ff00, 1); // Set fill color
+                    graphics.lineStyle(2, 0xDC143C, 1); // Crimson color (0xDC143C), line width 2, full opacity
+    
+                    // Draw the rectangle outline
+                    graphics.strokeRect(0, 0, rectWidth, rectHeight);
+
+                    // Create a container to position the rectangle (since graphics are not game objects themselves)
+                    const container = this.add.container(y, 260, [graphics]);
+
+                    // Optionally, set properties or add interactivity
+                    container.setSize(rectWidth, rectHeight); // Define the size of the container
+
+                    // Add the container to the group
+                    rectangleGroup.add(container);
+                }
+
+                // Now, you can manage the group collectively
+                rectangleGroup.children.iterate((child) => {
+                    // Example: Set alpha for all rectangles
+                    child.setAlpha(0.8);
+                });
+
+
+
+                // Load data from CSV
+                /*
+                fetch('schedules/sch1.csv')
+                    .then(response => response.text())
+                    .then(csv => {
+                        const parsedData = Papa.parse(csv, { header: true, dynamicTyping: true }).data;
+                        this.trials = parsedData;
+                        this.currentTrialIndex = 0;
+                        this.runTrial();
+                    });
+                */
+
+                // Initialize slider and button
+                this.slider = this.add.rectangle(400, 500, 300, 10, 0x888888).setOrigin(0.5, 0.5);
+                this.add.text(240, 520, '-100', { fontSize: '16px', fill: '#fff' });
+                this.add.text(520, 520, '100', { fontSize: '16px', fill: '#fff' });
+
+                this.submitButton = this.add.rectangle(400, 550, 100, 40, 0x00ff00).setInteractive();
+                this.add.text(375, 550, 'Submit', { fontSize: '16px', fill: '#000' });
+                this.submitButton.on('pointerdown', () => this.submitRating());
+            }
+
+            runTrial() {
+                const trial = this.trials[this.currentTrialIndex];
+                const stimuli = trial.filter(row => row.shown === 1).sort((a, b) => a.order - b.order);
+
+                let index = 0;
+                const showStimulus = () => {
+                    if (index < stimuli.length) {
+                        const stim = stimuli[index];
+                        const position = this.positions[stim.stim_positions - 1];
+
+                        const diamond = this.add.image(position.x, position.y, 'diamond').setScale(0.5);
+                        this.tweens.add({
+                            targets: diamond,
+                            alpha: 0,
+                            duration: 1000,
+                            onComplete: () => {
+                                diamond.destroy();
+                                index++;
+                                showStimulus();
+                            },
+                        });
+                    } else {
+                        this.showTarget(trial.target);
+                    }
+                };
+
+                showStimulus();
+            }
+
+            showTarget(target) {
+                const targetImage = target === 1 ? 'triangle_red' : 'triangle_yellow';
+                this.target = this.add.image(400, 300, targetImage).setScale(0.5);
+            }
+
+            submitRating() {
+                // Simulate outcome display
+                const trial = this.trials[this.currentTrialIndex];
+                const actualOutcome = trial.outcome + Phaser.Math.Between(-2, 2);
+
+                this.add.text(400, 580, `Outcome: ${actualOutcome}`, {
+                    fontSize: '16px',
+                    fill: '#fff',
+                }).setOrigin(0.5);
+
+                this.time.delayedCall(2000, () => {
+                    this.currentTrialIndex++;
+                    if (this.currentTrialIndex < this.trials.length) {
+                        this.runTrial();
+                    } else {
+                        this.add.text(400, 300, 'Experiment Complete!', {
+                            fontSize: '32px',
+                            fill: '#fff',
+                        }).setOrigin(0.5);
+                    }
+                });
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            backgroundColor: '#000',
+            scene: [ExperimentScene],
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
