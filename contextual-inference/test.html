@@ -71,7 +71,7 @@
 
                     // Create an image and add it to the group
                     let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
-                    image.setAlpha(0.2);
+                    image.setAlpha(0);
                     this.stimGr.add(image);
                 }
 
@@ -85,54 +85,45 @@
             }
 
             // Start trial and process stimuli sequence
-            runTrials() {
+            async runTrials() {
                 this.tridx = 0; 
-                this.notrials = this.trialData.length
-                this.timing = []
-                this.timing[1000, 3000, 5000]
+                this.notrials = this.trialData.length;
+                this.timing = [1000, 3000, 5000]; // Proper array initialization
 
-                for (let i = 1; i <= this.notrials; i++) {
-                    console.log(`Trial ${this.tridx}`) 
+                for (let i = 0; i < this.notrials-1; i++) {
+                    console.log(`Trial ${this.tridx}`); 
 
                     // Get sequence for this trial
                     this.trialData[this.tridx].seq = [];
-                    for (let i = 1; i <= 3; i++) {
-                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${i}`], 10);
+                    for (let j = 1; j <= 3; j++) {
+                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10);
                         this.trialData[this.tridx].seq.push(stimPosition);
                     }
-                    console.log("   Seqence: " +  this.trialData[this.tridx].seq)
+                    console.log("   Sequence: " + this.trialData[this.tridx].seq);
 
                     // Flash stimuli in sequence
-                    // Issue = since this is async, the timeline only gets executed at the end of the trials, not for each trial ;/ 
-                    const tr_timeline = this.add.timeline(
-                            [{  at: this.timing[0],
-                                run: () => {
-                                    console.log(this.tridx-1);
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[0]);
-                                }
-                            }, 
-                            {
-                                at: this.timing[1],
-                                run: () => {
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[1]);
-                                }
-                            }, 
-                            {
-                                at: this.timing[2],
-                                run: () => {
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[2]);
-                                }
-                            }
-                        ]
+                    await this.runTimeline(this.trialData[this.tridx].seq);
 
-                    );
-                    tr_timeline.play();
-
-                    
-                    this.tridx += 1
+                    this.tridx += 1;
                 }
-
             }
+
+            runTimeline(sequence) {
+            return new Promise((resolve) => {
+                this.time.delayedCall(this.timing[0], () => {
+                    this.showStimulus(sequence[0]);
+                });
+
+                this.time.delayedCall(this.timing[1], () => {
+                    this.showStimulus(sequence[1]);
+                });
+
+                this.time.delayedCall(this.timing[2], () => {
+                    this.showStimulus(sequence[2]);
+                    resolve(); // Resolve the promise after the last stimulus
+                });
+            });
+        }
         
         showStimulus(stpos) {
             console.log(`St pos ${stpos}`);
@@ -145,22 +136,29 @@
             }
 
             let targetStim = this.stimGr.getChildren()[stpos]; // Get the image by index
+            targetStim.setAlpha(1);
 
+            // Create a delayed call to return the alpha back to 0.2 after 1 second
+            this.time.delayedCall(1000, () => {
+                targetStim.setAlpha(0);
+            });
+            /*
             this.tweens.add({
                 targets: targetStim,
                 alpha: 1, // Flash to 0.8
                 duration: 1000, // 1 second
-                ease: 'Linear',
+                ease: 'Cubic.easeOut',
                 onComplete: () => {
                     // Create a second tween to return the alpha back to 0.2
                     this.tweens.add({
                         targets: targetStim,
                         alpha: 0.2, // Return to 0.2
                         duration: 1000, // 1 second
-                        ease: 'Linear',
+                        ease: 'Cubic.easeIn',
                     });
                 },
             });
+            */
         }
     
     }

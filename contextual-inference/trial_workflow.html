@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimental Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="csvFileInput" accept=".csv">
+    <div id="game-container"></div>
+
+    <script type="text/javascript">
+
+        // Handle file input change
+        /*
+        document.getElementById('csvFileInput').addEventListener('change', handleFile, false);
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true, // Set to true if the CSV has a header row
+                    dynamicTyping: true, // Automatically convert numeric data
+                    complete: function(results) {
+                        console.log("Parsed CSV data:", results.data);
+                        displayData(results.data);
+                    },
+                    error: function(error) {
+                        console.error("Error parsing CSV:", error);
+                    }
+                });
+            }
+        }
+
+        // Function to display data in the browser
+        function displayData(data) {
+            const output = document.getElementById('output');
+            output.textContent = JSON.stringify(data, null, 2); // Display parsed CSV as formatted JSON
+        }
+        */
+
+        var game = new Phaser.Game(config);
+
+        var stim_dim_x = 50
+        var stim_dim_y = 50
+        var im1, im2, im3, im4, im5, im6
+
+        var rectangleGroup
+        var rectWidth = 80
+        var rectHeight = 80
+
+        var cX = 400
+        var cY = 300
+        var r = 200
+
+        class ExperimentScene extends Phaser.Scene {
+            constructor() {
+                super('ExperimentScene');
+            }
+
+            preload() {
+                // Preload assets
+                this.load.image('space', 'assets/bg2.jpg');
+                this.load.image('stim1', 'assets/diamond.png');
+                this.load.image('stim2', 'assets/starfish.png');
+                this.load.image('stim3', 'assets/tree.png');
+                this.load.image('stim4', 'assets/wood.png');
+                this.load.image('stim5', 'assets/stone.png');
+                this.load.image('stim6', 'assets/moon.png');
+                this.load.image('t1', 'assets/target1.png');
+                this.load.image('t2', 'assets/target2.png');
+            }
+
+            create() {
+                // Background setup
+                this.add.image(400, 300, 'space').setDisplaySize(800, 600);
+                
+                /*
+                var group = this.add.group(); // Create a group
+
+                // Add 6 images at 60-degree increments
+                for (let i = 0; i < 6; i++) {
+                    var angle = Phaser.Math.DegToRad(i * 60); // Convert degrees to radians
+                    var x = centerX + radius * Math.cos(angle);
+                    var y = centerY + radius * Math.sin(angle);
+
+                    // Create an image and add it to the group
+                    var image = this.add.image(x, y, 'stim').setDisplaySize(stim_dim_x, stim_dim_y); 
+                    group.add(image);
+
+                    // Optional: Align the image's origin
+                    image.setOrigin(0.5, 0.5);
+                }
+                */
+
+                rectangleGroup = this.add.group();
+                for (let y = 61; y <= 561; y += 100) {
+                    // Create a graphics object for the rectangle
+                    const graphics = this.add.graphics();
+                    //graphics.fillStyle(0x00ff00, 1); // Set fill color
+                    graphics.lineStyle(2, 0xDC143C, 1); // Crimson color (0xDC143C), line width 2, full opacity
+    
+                    // Draw the rectangle outline
+                    graphics.strokeRect(0, 0, rectWidth, rectHeight);
+
+                    // Create a container to position the rectangle (since graphics are not game objects themselves)
+                    const container = this.add.container(y, 260, [graphics]);
+
+                    // Optionally, set properties or add interactivity
+                    container.setSize(rectWidth, rectHeight); // Define the size of the container
+
+                    // Add the container to the group
+                    rectangleGroup.add(container);
+                }
+
+                // Now, you can manage the group collectively
+                rectangleGroup.children.iterate((child) => {
+                    // Example: Set alpha for all rectangles
+                    child.setAlpha(0.8);
+                });
+
+                fetch('schedules/sch1.csv')
+                .then(response => response.text())
+                .then(text => {
+                    trialData = Papa.parse(text, { header: true }).data;
+                    startTrial(this);
+                });
+            }
+
+            update ()
+            {}
+        }
+
+        var config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            backgroundColor: '#e74c3c',
+            scene: [ExperimentScene],
+        };
+
+        function startTrial(scene) {
+            trial = trialData[currentTrialIndex];
+            console.log(trial); 
+        }
+
+    </script>
+</body>
+</html>
