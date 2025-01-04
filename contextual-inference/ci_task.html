@@ -41,10 +41,13 @@
         var trialData
         var seq, td
 
+        var targets, t1, t2
+
         class ExperimentScene extends Phaser.Scene {
             constructor() {
                 super('ExperimentScene');
             }
+            
 
             preload() {
                 // Preload assets
@@ -55,12 +58,23 @@
                 this.load.image('stim4', 'assets/wood.png');
                 this.load.image('stim5', 'assets/stone.png');
                 this.load.image('stim6', 'assets/moon.png');
+                this.load.image('t1', 'assets/target1.png');
+                this.load.image('t2', 'assets/target2.png');
+                this.load.image('submit', 'assets/submit.png');
+
             }
 
             create() {
+                this.cfg =[] 
+                this.cfg.ctx_alpha_baseline = 0.1
+                this.cfg.ctx_alpha_peak = 1
+                this.cfg.tar_alpha_baseline = 0.1
+
                 // Background setup
                 this.add.image(400, 300, 'space').setDisplaySize(800, 600);
+                
 
+                // Create group from contextual cues
                 this.stimGr = this.add.group(); // Create a group
 
                 // Add 6 images at 60-degree increments
@@ -71,8 +85,37 @@
 
                     // Create an image and add it to the group
                     let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
-                    image.setAlpha(0.2);
+                    image.setAlpha(this.cfg.ctx_alpha_baseline);
                     this.stimGr.add(image);
+                }
+                
+                // Create group from contextual cues
+                this.tarGr = this.add.group(); // Create a group
+
+                // Add 2 targets
+                for (let i = 0; i < 2; i++) {
+                    let tim = this.add.image(cX, cY, 't'+(i+1)).setDisplaySize(stim_dim_x*1.5, stim_dim_y*1.5);
+                    tim.setAlpha(this.cfg.tar_alpha_baseline);
+                    this.tarGr.add(tim); 
+                }
+                //targets["t2"].setAlpha(0.8)
+
+                // create gradient texture
+                const sliderWidth = 300;
+                const sliderHeight = 10;
+
+                if (!this.textures.exists('gradient')) {
+                    const gradientTexture = this.textures.createCanvas('gradient', sliderWidth, sliderHeight);
+                    const gradientCtx = gradientTexture.context;
+
+                    const grd = gradientCtx.createLinearGradient(0, 0, sliderWidth, 0);
+                    grd.addColorStop(0, 'crimson');
+                    grd.addColorStop(0.5, 'gray');
+                    grd.addColorStop(1, '#28b463');
+
+                    gradientCtx.fillStyle = grd;
+                    gradientCtx.fillRect(0, 0, sliderWidth, sliderHeight);
+                    gradientTexture.refresh();
                 }
 
                 // Fetch trial data
@@ -85,53 +128,140 @@
             }
 
             // Start trial and process stimuli sequence
-            runTrials() {
-                this.tridx = 0; 
-                this.notrials = this.trialData.length
-                this.timing = []
-                this.timing[1000, 3000, 5000]
+            async runTrials() {
+                
 
-                for (let i = 1; i <= this.notrials; i++) {
-                    console.log(`Trial ${this.tridx}`) 
+
+                this.tridx = 0; 
+                this.notrials = this.trialData.length;
+                this.timing = []
+                this.timing.ctx_warupdown = 750;
+                this.timing.ctx_cue_dur = 250;
+                this.timing.ctx_onsets = [500, 1500, 2500]; // Proper array initialization
+                this.timing.ctxs_offset = [3500]
+                this.timing.ctx_all = [...this.timing.ctx_onsets, ...this.timing.ctxs_offset]
+                this.timing.target_dur = 1000
+                this.timing.iti = 2000
+
+                for (let i = 0; i < this.notrials-1; i++) {
+                    console.log(`Trial ${this.tridx}`); 
 
                     // Get sequence for this trial
                     this.trialData[this.tridx].seq = [];
-                    for (let i = 1; i <= 3; i++) {
-                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${i}`], 10);
+                    for (let j = 1; j <= 3; j++) {
+                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10);
                         this.trialData[this.tridx].seq.push(stimPosition);
                     }
-                    console.log("   Seqence: " +  this.trialData[this.tridx].seq)
+                    console.log("   Sequence: " + this.trialData[this.tridx].seq);
 
                     // Flash stimuli in sequence
-                    // Issue = since this is async, the timeline only gets executed at the end of the trials, not for each trial ;/ 
-                    const tr_timeline = this.add.timeline(
-                            [{  at: this.timing[0],
-                                run: () => {
-                                    console.log(this.tridx-1);
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[0]);
-                                }
-                            }, 
-                            {
-                                at: this.timing[1],
-                                run: () => {
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[1]);
-                                }
-                            }, 
-                            {
-                                at: this.timing[2],
-                                run: () => {
-                                    this.showStimulus(this.trialData[this.tridx-1].seq[2]);
-                                }
-                            }
-                        ]
+                    await this.showCtxtCues(this.trialData[this.tridx].seq);
 
-                    );
-                    tr_timeline.play();
-
+                    // Show target
+                    await this.showTarget(this.trialData[this.tridx].target);
                     
-                    this.tridx += 1
-                }
 
+                    await this.waitFor(this.timing.target_dur);
+
+                    // Display slider and wait for rating
+                    this.createSlider();
+                    await this.waitForSliderInput();
+
+                    // Show outcome text
+                    await this.showOutcomeText(this.trialData[this.tridx].outcome);
+
+                    // Change alpha back to baseline
+                    this.stimGr.children.each((child) => {
+                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                    });
+                    
+                    this.tarGr.children.each((child) => { 
+                        child.alpha = this.cfg.tar_alpha_baseline;
+                    });
+                     //   ["t"+this.trialData[this.tridx].target].setAlpha(this.cfg.tar_alpha_baseline);
+
+                     await this.waitFor(this.timing.iti);
+
+                    this.tridx += 1;
+                }
+            }
+
+            showOutcomeText(outcome) {
+                return new Promise((resolve) => {
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY - 70;
+
+                    // Determine glow color based on the outcome
+                    const glowHexColor = outcome > 0 ? '#28b463' : '#8B0000';
+                    const txtColor = outcome > 0 ? '#abebc6' : '#fadbd8';
+
+                    // Add the outcome text
+                    const outcomeText = this.add.text(centerX, centerY, `${outcome} points!`, {
+                        fontSize: '26px',
+                        fontFamily: 'Arial',
+                        color: txtColor,
+                        align: 'center',
+                    }).setOrigin(0.5);
+
+                    // Add crimson glow effect
+                    outcomeText.setStroke(glowHexColor, 6); // Crimson stroke around the text
+                    outcomeText.setShadow(2, 2, glowHexColor, 10, true, true); // Crimson glow effect
+
+                    // Remove the text after 2 seconds and resolve the promise
+                    this.time.delayedCall(2000, () => {
+                        outcomeText.destroy();
+                        resolve(); // Resolve the promise after the text disappears
+                    });
+                });
+            }
+
+            waitForSliderInput() {
+                return new Promise((resolve) => {
+                    const checkSlider = setInterval(() => {
+                        if (this.sliderSubmitted) {
+                            clearInterval(checkSlider);
+                            resolve();
+                        }
+                    }, 100); // Check every 100ms if slider input is complete
+                });
+            }
+
+            waitFor(duration) {
+                return new Promise((resolve) => {
+                    this.time.delayedCall(duration, resolve);
+                });
+            }
+
+            showCtxtCues(sequence) {
+                return new Promise((resolve) => {
+                    console.log(this.timing.ctx_all)
+                    for (let i = 0; i < this.timing.ctx_all.length; i++) {
+                        console.log(i)
+                        this.time.delayedCall(this.timing.ctx_all[i], () => { 
+                            if (i < (this.timing.ctx_onsets.length)) {
+                                this.showStimulus(sequence[i]);
+                            } else {
+                                resolve(); // Resolve the promise after the last stimulus
+                            }
+                        });
+                    }
+                });
+            }
+
+            showTarget(tid) {
+                return new Promise((resolve) => { 
+                    let target = this.tarGr.getChildren()[tid-1]
+                    var targetFlash = this.tweens.chain({ 
+                        targets: target, 
+                        start: true,
+                        tweens: [
+                            {alpha: this.cfg.ctx_alpha_peak, duration: this.timing.ctx_warupdown, ease: 'Cubic.easeOut'}
+                            //{delay: this.timing.target_dur}, 
+                            //{alpha: this.cfg.ctx_alpha_baseline, duration: this.timing.ctx_warupdown, ease: 'Cubic.easeIn'}
+                        ]
+                    })
+                    resolve()
+                })
             }
         
         showStimulus(stpos) {
@@ -143,25 +273,84 @@
                 console.error(`Invalid stimulus position: ${stpos}`);
                 return;
             }
-
             let targetStim = this.stimGr.getChildren()[stpos]; // Get the image by index
-
-            this.tweens.add({
-                targets: targetStim,
-                alpha: 1, // Flash to 0.8
-                duration: 1000, // 1 second
-                ease: 'Linear',
-                onComplete: () => {
-                    // Create a second tween to return the alpha back to 0.2
-                    this.tweens.add({
-                        targets: targetStim,
-                        alpha: 0.2, // Return to 0.2
-                        duration: 1000, // 1 second
-                        ease: 'Linear',
-                    });
-                },
-            });
+            var stimFlash = this.tweens.chain({ 
+                targets: targetStim, 
+                start: true,
+                tweens: [
+                    {alpha: this.cfg.ctx_alpha_peak, duration: this.timing.ctx_warupdown, ease: 'Cubic.easeOut'}, 
+                    {delay: this.timing.ctx_cue_dur}, 
+                    //{alpha: this.cfg.ctx_alpha_baseline, duration: this.timing.ctx_warupdown, ease: 'Cubic.easeIn'}
+                ]
+            })
+            
         }
+
+        createSlider() {
+            const sliderWidth = 300; // Scale width in pixels
+            const sliderHeight = 10; // Scale height
+            const sliderHandleWidth = 10; // Slider handle width
+            const sliderHandleHeight = 25; // Slider handle height
+
+            const centerX = this.cameras.main.centerX;
+            const centerY = this.cameras.main.centerY + 80; // Position slightly below the target
+
+            this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
+            this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
+
+            // Add the slider handle
+            this.handle = this.add.rectangle(centerX, centerY, sliderHandleWidth, sliderHandleHeight, 0x000000).setInteractive();
+            //this.handle.preFX.addGlow('yellow')
+            //this.handle.setDepth(2);
+
+            this.input.setDraggable(this.handle);
+
+            // Add text to display the rating above the slider
+            this.ratingText = this.add.text(centerX, centerY - 25, 'Expected outcome: 0', {
+                fontSize: '18px',
+                color: '#ffffff',
+            }).setOrigin(0.5);
+
+            // Drag functionality for the slider handle
+            this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                if (gameObject === this.handle) {
+                    // Clamp handle position to stay within scale line
+                    gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
+
+                    // Map handle position to -100 to 100
+                    const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
+                    const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
+                    this.ratingText.setText(`Expected outcome: ${rating}`);
+                    this.currentRating = rating; // Store the current rating
+
+
+                }
+            });
+
+            // Add the submit button as an image
+            this.submitButton = this.add.image(centerX, centerY + 40, 'submit').setInteractive();
+            let scalefac = 5
+            this.submitButton.setDisplaySize(512/scalefac, 302/scalefac); // Adjust size as needed
+
+            this.submitButton.on('pointerdown', () => {
+                console.log('Submitted rating:', this.currentRating);
+                this.sliderSubmitted = true; // Signal that the slider input is complete
+                this.removeSlider(); // Remove all slider components
+            });
+
+            // Initialize currentRating
+            this.currentRating = 0; // Default value at the center
+            this.sliderSubmitted = false;
+        }
+
+        // Helper to remove all slider components
+        removeSlider() {
+            this.scaleLine.destroy();
+            this.handle.destroy();
+            this.ratingText.destroy();
+            this.submitButton.destroy();
+        }
+
     
     }
         
