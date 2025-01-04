@@ -25,21 +25,12 @@
     <div id="game-container"></div>
 
     <script>
-        var stim_dim_x = 50
-        var stim_dim_y = 50
-        var im1, im2, im3, im4, im5, im6
-
-        var rectangleGroup
-        var group, angle, x, y, image, graphics
-        var rectWidth = 80
-        var rectHeight = 80
-
-        var cX = 400
-        var cY = 300
-        var r = 200
-
-        var trialData
-        var seq, td
+        var stim_dim_x = 50;
+        var stim_dim_y = 50;
+        var cX = 400;
+        var cY = 300;
+        var r = 200;
+        var particles;
 
         class ExperimentScene extends Phaser.Scene {
             constructor() {
@@ -47,7 +38,6 @@
             }
 
             preload() {
-                // Preload assets
                 this.load.image('space', 'assets/bg2.jpg');
                 this.load.image('stim1', 'assets/diamond.png');
                 this.load.image('stim2', 'assets/starfish.png');
@@ -55,127 +45,53 @@
                 this.load.image('stim4', 'assets/wood.png');
                 this.load.image('stim5', 'assets/stone.png');
                 this.load.image('stim6', 'assets/moon.png');
+                this.load.image('t1', 'assets/target1.png');
+                this.load.image('t2', 'assets/target2.png');
+                this.load.image('star', 'assets/star.png');
+                this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
             }
 
             create() {
-                // Background setup
+                this.cfg = {
+                    ctx_alpha_baseline: 0.1,
+                    ctx_alpha_peak: 1,
+                    tar_alpha_baseline: 0.1
+                };
+
                 this.add.image(400, 300, 'space').setDisplaySize(800, 600);
-
-                this.stimGr = this.add.group(); // Create a group
-
-                // Add 6 images at 60-degree increments
-                for (let i = 0; i < 6; i++) {
-                    let angle = Phaser.Math.DegToRad(i * 60); // Convert degrees to radians
-                    let x = cX + r * Math.cos(angle);
-                    let y = cY + r * Math.sin(angle);
-
-                    // Create an image and add it to the group
-                    let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
-                    image.setAlpha(0);
-                    this.stimGr.add(image);
-                }
-
-                // Fetch trial data
-                fetch('schedules/sch1.csv')
-                    .then(response => response.text())
-                    .then(text => {
-                        this.trialData = Papa.parse(text, { header: true }).data;
-                        this.runTrials(); // Correctly bind this
-                    });
-            }
-
-            // Start trial and process stimuli sequence
-            async runTrials() {
-                this.tridx = 0; 
-                this.notrials = this.trialData.length;
-                this.timing = [1000, 3000, 5000]; // Proper array initialization
-
-                for (let i = 0; i < this.notrials-1; i++) {
-                    console.log(`Trial ${this.tridx}`); 
-
-                    // Get sequence for this trial
-                    this.trialData[this.tridx].seq = [];
-                    for (let j = 1; j <= 3; j++) {
-                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10);
-                        this.trialData[this.tridx].seq.push(stimPosition);
-                    }
-                    console.log("   Sequence: " + this.trialData[this.tridx].seq);
-
-                    // Flash stimuli in sequence
-                    await this.runTimeline(this.trialData[this.tridx].seq);
-
-                    this.tridx += 1;
-                }
-            }
-
-            runTimeline(sequence) {
-            return new Promise((resolve) => {
-                this.time.delayedCall(this.timing[0], () => {
-                    this.showStimulus(sequence[0]);
+                // https://phaser.io/examples/v3.85.0/game-objects/particle-emitter/view/fire-effects
+                const flame = this.add.particles(150, 550, 'flares',
+                {
+                    frame: 'white',
+                    color: [ 0xfacc22, 0xf89800, 0xf83600, 0x9f0404 ],
+                    colorEase: 'quad.out',
+                    lifespan: 2400,
+                    angle: { min: -100, max: -80 },
+                    scale: { start: 0.70, end: 0, ease: 'sine.out' },
+                    speed: 100,
+                    advance: 2000,
+                    blendMode: 'ADD'
                 });
 
-                this.time.delayedCall(this.timing[1], () => {
-                    this.showStimulus(sequence[1]);
-                });
+                 
 
-                this.time.delayedCall(this.timing[2], () => {
-                    this.showStimulus(sequence[2]);
-                    resolve(); // Resolve the promise after the last stimulus
-                });
-            });
+                //const particles = this.add.particles('sparkle');
+
+
+                
+
         }
-        
-        showStimulus(stpos) {
-            console.log(`St pos ${stpos}`);
-            console.log(`Showing stimulus at position ${stpos}`);
-
-            // Ensure position is valid
-            if (stpos < 0 || stpos >= this.stimGr.getChildren().length) {
-                console.error(`Invalid stimulus position: ${stpos}`);
-                return;
-            }
-
-            let targetStim = this.stimGr.getChildren()[stpos]; // Get the image by index
-            targetStim.setAlpha(1);
-
-            // Create a delayed call to return the alpha back to 0.2 after 1 second
-            this.time.delayedCall(1000, () => {
-                targetStim.setAlpha(0);
-            });
-            /*
-            this.tweens.add({
-                targets: targetStim,
-                alpha: 1, // Flash to 0.8
-                duration: 1000, // 1 second
-                ease: 'Cubic.easeOut',
-                onComplete: () => {
-                    // Create a second tween to return the alpha back to 0.2
-                    this.tweens.add({
-                        targets: targetStim,
-                        alpha: 0.2, // Return to 0.2
-                        duration: 1000, // 1 second
-                        ease: 'Cubic.easeIn',
-                    });
-                },
-            });
-            */
-        }
-    
     }
-        
 
-        const config = {
-            type: Phaser.AUTO,
-            width: 800,
-            height: 600,
-            backgroundColor: '#000',
-            scene: [ExperimentScene],
-        };
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        backgroundColor: '#000',
+        scene: [ExperimentScene],
+    };
 
-        const game = new Phaser.Game(config);
-
-    
-        
+    const game = new Phaser.Game(config);
     </script>
 </body>
 </html>

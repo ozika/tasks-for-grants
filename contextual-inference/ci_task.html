@@ -62,6 +62,12 @@
                 this.load.image('t2', 'assets/target2.png');
                 this.load.image('submit', 'assets/submit.png');
 
+                const graphics = this.make.graphics();
+                graphics.fillStyle(0x2ecc71, 1); // Sparkle color: #2ecc71
+                graphics.fillCircle(5, 5, 5);
+                graphics.generateTexture('sparkle', 10, 10);
+                //graphics.destroy();
+
             }
 
             create() {
@@ -71,7 +77,21 @@
                 this.cfg.tar_alpha_baseline = 0.1
 
                 // Background setup
-                this.add.image(400, 300, 'space').setDisplaySize(800, 600);
+                this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
+
+                this.sparkleEmitter = this.add.particles('sparkle', {
+                    lifespan: 500,
+                    speed: { min: 100, max: 200 },
+                    angle: { start: 0, end: 360, steps: 32 },
+                    scale: { start: 0.5, end: 0 },
+                    tint: "#28b463", // Sparkle color
+                    quantity: 32,
+                    blendMode: 'ADD', // Optional for visual enhancement
+                    emitZone: undefined, // Particles emit from a single position by default
+                }).setDepth(4);
+
+                // Stop emitter by default
+                //this.sparkleEmitter.stop();
                 
 
                 // Create group from contextual cues
@@ -379,7 +399,7 @@
                 const stimY = stim.y;
 
                 // Create a graphics object for the line
-                const lineGraphics = this.add.graphics({ lineStyle: { width: 3, color: 0x000000 } });
+                const lineGraphics = this.add.graphics({ lineStyle: { width: 3, color: 0x000000 } }).setDepth(-1);
 
                 // Calculate the line extension increment
                 const duration = 800;
@@ -405,10 +425,15 @@
                         if (currentLength >= distance) {
                             lineTween.remove();
 
-                            // Draw the circle at the center
+                            // Draw the filled circle at the center
                             const radius = 10 * (stimulusIndex + 1);
-                            const circleGraphics = this.add.graphics({ lineStyle: { width: 3, color: 0x000000 } });
-                            circleGraphics.strokeCircle(centerX, centerY, radius);
+                            const circleGraphics = this.add.graphics().setDepth(-1);
+                            circleGraphics.fillStyle(0x000000, 1); // Black filled circle
+                            circleGraphics.fillCircle(centerX, centerY, radius);
+
+                            // Emit particles from the circle
+                            this.sparkleEmitter.setPosition(centerX, centerY);
+                            this.sparkleEmitter.explode(32, centerX, centerY); // Emit particles
 
                             // If it's the third stimulus, add the target
                             if (stimulusIndex === 2) {
@@ -423,6 +448,8 @@
                 });
             });
         }
+
+
 
     
     }
