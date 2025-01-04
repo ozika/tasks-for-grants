@@ -60,20 +60,27 @@
 
                 this.add.image(400, 300, 'space').setDisplaySize(800, 600);
                 // https://phaser.io/examples/v3.85.0/game-objects/particle-emitter/view/fire-effects
-                const flame = this.add.particles(150, 550, 'flares',
+                const flame = this.add.particles(400, 300, 'flares',
                 {
                     frame: 'white',
                     color: [ 0xfacc22, 0xf89800, 0xf83600, 0x9f0404 ],
                     colorEase: 'quad.out',
                     lifespan: 2400,
-                    angle: { min: -100, max: -80 },
+                    angle: { min: 0, max: 360 },
                     scale: { start: 0.70, end: 0, ease: 'sine.out' },
-                    speed: 100,
-                    advance: 2000,
-                    blendMode: 'ADD'
+                    speed: 200,
+                    advance: 1000,
+                    blendMode: 'ADD', 
+                    start: false
                 });
 
                  
+                flame.start()
+
+                this.time.delayedCall(50, () => {
+                    flame.stop()
+                    //resolve(); // Resolve the promise after the text disappears
+                });
 
                 //const particles = this.add.particles('sparkle');
 
