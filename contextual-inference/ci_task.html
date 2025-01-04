@@ -232,6 +232,7 @@
                 });
             }
 
+            /*
             showCtxtCues(sequence) {
                 return new Promise((resolve) => {
                     console.log(this.timing.ctx_all)
@@ -246,6 +247,22 @@
                         });
                     }
                 });
+            }
+                */
+
+            async showCtxtCues(sequence) {
+                for (let i = 0; i < sequence.length; i++) {
+                    const stimPos = sequence[i];
+
+                    // Show the stimulus at the current position
+                    this.showStimulus(stimPos);
+
+                    // Extend the line from the stimulus to the center and draw the circle
+                    await this.extendLineAndDrawCircle(stimPos, i);
+
+                    // Optionally, wait for the duration of the stimulus (ctx_cue_dur)
+                    await this.waitFor(this.timing.ctx_cue_dur);
+                }
             }
 
             showTarget(tid) {
@@ -349,6 +366,62 @@
             this.handle.destroy();
             this.ratingText.destroy();
             this.submitButton.destroy();
+        }
+
+        extendLineAndDrawCircle(stimPos, stimulusIndex) {
+            return new Promise((resolve) => {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+
+                // Get the stimulus position
+                const stim = this.stimGr.getChildren()[stimPos];
+                const stimX = stim.x;
+                const stimY = stim.y;
+
+                // Create a graphics object for the line
+                const lineGraphics = this.add.graphics({ lineStyle: { width: 3, color: 0x000000 } });
+
+                // Calculate the line extension increment
+                const duration = 800;
+                const distance = Phaser.Math.Distance.Between(stimX, stimY, centerX, centerY);
+                const increment = distance / (duration / 16); // Assuming ~60 FPS
+
+                let currentLength = 0;
+
+                // Animate the line extension
+                const lineTween = this.time.addEvent({
+                    delay: 16, // Run every 16ms (~60 FPS)
+                    callback: () => {
+                        currentLength += increment;
+                        const t = currentLength / distance;
+                        const currentX = Phaser.Math.Linear(stimX, centerX, t);
+                        const currentY = Phaser.Math.Linear(stimY, centerY, t);
+
+                        // Redraw the line
+                        lineGraphics.clear();
+                        lineGraphics.lineBetween(stimX, stimY, currentX, currentY);
+
+                        // Stop the tween when the line reaches the center
+                        if (currentLength >= distance) {
+                            lineTween.remove();
+
+                            // Draw the circle at the center
+                            const radius = 10 * (stimulusIndex + 1);
+                            const circleGraphics = this.add.graphics({ lineStyle: { width: 3, color: 0x000000 } });
+                            circleGraphics.strokeCircle(centerX, centerY, radius);
+
+                            // If it's the third stimulus, add the target
+                            if (stimulusIndex === 2) {
+                                const target = this.tarGr.getChildren()[this.trialData[this.tridx].target - 1];
+                                target.setAlpha(1).setPosition(centerX, centerY);
+                            }
+
+                            resolve(); // Resolve the promise after the circle is drawn
+                        }
+                    },
+                    loop: true,
+                });
+            });
         }
 
     
