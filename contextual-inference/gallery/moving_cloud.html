@@ -142,10 +142,304 @@
                 });
 
                 
+                // SPARK
+                const spark = this.add.particles(700, 300, 'flares', {
+                        frame: [ 'yellow'],
+                        x: 0,
+                        y: 0,
+                        lifespan: 200,
+                        speed: 200,
+                        quantity: 1,
+                        scale: { start: 0.3, end: 0 },
+                        blendMode: 'SCREEN'//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    this.spark2 = this.add.particles(800, 300, 'flares', {
+                        frame: ['red'], // Initial color
+                        x: 0,
+                        y: 0,
+                        lifespan: 200,
+                        speed: 200,
+                        quantity: 1,
+                        scale: { start: 0.3, end: 0 },
+                        blendMode: 'SCREEN' // Adjust blending as needed
+                    });
+
+                    // Add keyboard listeners
+                    this.cursors = this.input.keyboard.createCursorKeys();
+
+                    // Current color frame for toggling
+                    this.currentFrame = 'red';
 
                 
+          
+
+                // different colors
+                var colors =[['red'], ['yellow'], ['blue'], ['green'], ['green', 'blue']]
+                var blend = ['NORMAL', 'NORMAL', 'NORMAL', 'NORMAL', 'ADD']
+                colors.forEach((x, idx) => {
+                const stim = this.add.particles(100 + 100*idx, 400, 'flares', {
+                        frame: x,
+                        x: 0,
+                        y: 0,
+                        lifespan: 200,
+                        speed: 200,
+                        quantity: 1,
+                        scale: { start: 0.3, end: 0 },
+                        blendMode: 'SCREEN'//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
 
 
+                    const stimwell = stim.createGravityWell({
+                        x: 0,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 80 //+ 30*idx**3
+                    });
+                
+                })
+
+                // Different shapes
+                var quantity = 2
+                var lifespan = 1200
+                var frame = ['blue']
+                var speed = 100
+                var bmode = 'SCREEN'
+                var size = 0.2
+                const sh1 = this.add.particles(100, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan,
+                        speed: speed,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    const sh1well = sh1.createGravityWell({
+                        x: -40,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh1well2 = sh1.createGravityWell({
+                        x: 40,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    // Stim 2
+                    const sh2 = this.add.particles(200, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan,
+                        speed: speed,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    const sh2well = sh2.createGravityWell({
+                        x: 0,
+                        y: -40,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh2well2 = sh2.createGravityWell({
+                        x: 0,
+                        y: 40,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    // Stim 3
+                    const sh3 = this.add.particles(300, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan,
+                        speed: 200,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    const sh3well = sh3.createGravityWell({
+                        x: 0,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 80 //+ 30*idx**3
+                    });
+
+                    // Stim 4
+                    const sh4 = this.add.particles(400, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan+200,
+                        speed: speed,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+                    var gr4 = 30
+                    const sh4well = sh4.createGravityWell({
+                        x: 0,
+                        y: -40,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: gr4*1.2 //+ 30*idx**3
+                    });
+
+                    const sh4well2 = sh4.createGravityWell({
+                        x: -50,
+                        y: 40,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: gr4*1 //+ 30*idx**3
+                    });
+
+                    const sh4well3 = sh4.createGravityWell({
+                        x: 50,
+                        y: 40,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: gr4*1 //+ 30*idx**3
+                    });
+
+                    
+                    var x5 = 500
+                    var y5 = 500
+                    var sz = 30
+                    //const shape2 = new Phaser.Geom.Ellipse(0,0,50,50);
+                    const sh5 = this.add.particles(500, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: 500,
+                        speed: 60,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode, // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+                    //sh5.addEmitZone({ speed:20, type: 'edge', source: new Phaser.Geom.Circle(0, 0, 30), quantity: 64, total: 1 });
+                    // Define the circular path
+                    const circlePath = new Phaser.Geom.Circle(0, 0, 1);
+
+                    // Add particles to emit along the circle
+                    sh5.addEmitZone({
+                        type: 'edge',
+                        source: circlePath,
+                        quantity: 64,
+                        total: 1,
+                    });
+
+                    // Animate the emitter moving along the circle
+                    let angle = 0;
+                    const moveSpeed = 0.01; // Lower this value for slower movement
+                    this.time.addEvent({
+                        delay: 16, // Adjust frame rate for smooth movement
+                        loop: true,
+                        callback: () => {
+                            angle += moveSpeed;
+                            if (angle >= Math.PI * 2) {
+                                angle -= Math.PI * 2; // Keep angle within 0 to 2π
+                            }
+                            const x = circlePath.x + 30 * Math.cos(angle);
+                            const y = circlePath.y + 30 * Math.sin(angle);
+                            sh5.setPosition(500 + x, 500 + y); // Update emitter position
+                        },
+                    });
+
+                    sh5.on('complete', () => {
+
+
+                        sh5.start();
+
+                    });
+
+                    // Stim 6
+                    const sh6 = this.add.particles(600, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan,
+                        speed: speed,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    const sh6well = sh6.createGravityWell({
+                        x: -30,
+                        y: -30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh6well2 = sh6.createGravityWell({
+                        x: 30,
+                        y: 30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh6well3 = sh6.createGravityWell({
+                        x: -30,
+                        y: 30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh6well4 = sh6.createGravityWell({
+                        x: 30,
+                        y: -30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    // Stim 7
+                    const sh7 = this.add.particles(700, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan,
+                        speed: speed,
+                        quantity: quantity,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    const sh7well = sh7.createGravityWell({
+                        x: -30,
+                        y: 30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
+
+                    const sh7well2 = sh7.createGravityWell({
+                        x: 30,
+                        y: -30,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 150 //+ 30*idx**3
+                    });
 
            
 
@@ -165,6 +459,16 @@
 
                 
 
+        }
+
+        update() {
+            if (this.cursors.down.isDown && this.currentFrame !== 'yellow') {
+                this.currentFrame = 'yellow'; // Update current color
+                this.spark2.frame = ['yellow']; // Change particles to yellow
+            } else if (this.cursors.up.isDown && this.currentFrame !== 'red') {
+                this.currentFrame = 'red'; // Update current color
+                this.spark2.frame =['red']; // Change particles to red
+            }
         }
     }
 

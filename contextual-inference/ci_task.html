@@ -93,6 +93,62 @@
                 }).setDepth(2);
                 this.flame.stop()
 
+                // Particles for target 
+                this.dark = this.add.particles(400, 300, 'flares', {
+                            frame: ['green'],
+                            lifespan: 500,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'ERASE',
+                        }), 
+
+                this.darkwell = this.dark.createGravityWell({
+                            x: 0,
+                            y: 0,
+                            power: 1,
+                            epsilon: 80,
+                            gravity: 30,
+                        });
+                this.dark.stop()
+
+                this.target_particles = [
+                    {   // Green particles for target 1
+                        dyn: this.add.particles(400, 300, 'flares', {
+                            frame: ['green'],
+                            lifespan: 2000,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.2, end: 0 },
+                            blendMode: 'MULTIPLY',
+                        }),
+                        dynwell: null // Will be set later
+                    },
+                    {   // Red particles for target 2
+                        dyn: this.add.particles(400, 300, 'flares', {
+                            frame: ['red'],
+                            lifespan: 2000,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.2, end: 0 },
+                            blendMode: 'MULTIPLY',
+                        }),
+                        dynwell: null // Will be set later
+                    }
+                ];
+                // Stop particle systems and create gravity wells
+                this.target_particles.forEach((particle) => {
+                        particle.dyn.stop();
+                        particle.dynwell = particle.dyn.createGravityWell({
+                            x: 0,
+                            y: 0,
+                            power: 1,
+                            epsilon: 80,
+                            gravity: 30,
+                        });
+                    });
+
+                /*
                 // Prepare gravity black hole
                 this.dyn = this.add.particles(400,300, 'flares', {
                     frame: ['green'],
@@ -114,7 +170,7 @@
                     });
                 // Stop emitter by default
                 //this.sparkleEmitter.stop();
-
+                    */
                this.circleGraphicsArray = [];
 
                 
@@ -192,19 +248,18 @@
                 for (let i = 0; i < this.notrials-1; i++) {
 
                     // Reset gravity well and particle properties for each trial
-                    //this.dynwell.x = cX;
-                    //this.dynwell.y = cY;
+                    this.darkwell.gravity = 30
+                    this.darkwell.power = 1 
+                    this.dark.lifespan = 500
+                    this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 30; // Reset to default or base gravity
 
-                    
-                    this.dynwell.gravity = 30; // Reset to default or base gravity
-                    this.dynwell.epsilon = 80; // Ensure default epsilon
                     //this.dyn.setPosition(cX, cY); // Reset particle emitter position
                     
 
                     console.log(`Trial ${this.tridx}`); 
-                    console.log(`Gravity ${  this.dynwell.gravity}`);
-                    console.log(`Speed ${  this.dyn.speed}`);
-                    console.log(`lifespan ${  this.dyn.lifespan}`);
+                    console.log(`Gravity ${  this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity}`);
+                    console.log(`Speed ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.speed}`);
+                    console.log(`lifespan ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.lifespan}`);
                     //this.dyn.speed = 300
                     
 
@@ -219,11 +274,14 @@
                     // Flash stimuli in sequence
                     await this.showCtxtCues(this.trialData[this.tridx].seq);
                     
-                    await this.waitFor(500);
+                    this.dark.lifespan = 200
+                    await this.waitFor(500+ Math.random() * 5000);
 
+                    // show the color of the target
+                    this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
+                    this.dark.stop()
                     // Show target
-
-                    await this.showTarget(this.trialData[this.tridx].target);
+                    //await this.showTarget(this.trialData[this.tridx].target);
                     //this.dyn.speed = 300
                     //this.dynwell.gravity = 60
 
@@ -235,12 +293,11 @@
                     await this.waitForSliderInput();
 
                     
-                    this.dyn.stop()
+                    this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
                     
                     // ISI
                     await this.waitFor(this.timing.isi);
-                    this.dynwell.gravity = 0
-                    this.dyn.speed = 200
+                    this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
 
                     // Show outcome text
                     await this.showOutcomeText(this.trialData[this.tridx].outcome);
@@ -454,10 +511,33 @@
 
                 let currentLength = 0;
 
+                var spark = this.add.particles(700, 300, 'flares', {
+                        frame: [ 'yellow'],
+                        x: 0,
+                        y: 0,
+                        lifespan: 200,
+                        speed: 200,
+                        quantity: 1,
+                        scale: { start: 0.3, end: 0 },
+                        blendMode: 'SCREEN'//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+                // Add particles to emit along the circle
+                linePath = new Phaser.Geom.Line(stim.x, stim.y, centerX, centerY);
+                spark.addEmitZone({
+                    type: 'edge',
+                    source: linePath,
+                    quantity: 64,
+                    total: 1,
+                });
+
+
                 // Animate the line extension
                 const lineTween = this.time.addEvent({
                     delay: 16, // Run every 16ms (~60 FPS)
                     callback: () => {
+                        const circlePath = new Phaser.Geom.Line(0, 0, 1);
+
+                        
                         currentLength += increment;
                         const t = currentLength / distance;
                         const currentX = Phaser.Math.Linear(stimX, centerX, t);
@@ -472,11 +552,20 @@
                             lineTween.remove();
 
                             // Draw the filled circle at the center
-                            this.dynwell.power = 1
-                            this.dyn.lifespan = 500 + 1000 * sidx ** 2,
-                            console.log(JSON.stringify(this.dyn))
-                            console.log(JSON.stringify(this.dynwell))
-                            this.dyn.start()
+                            this.target_particles[this.trialData[this.tridx].target-1].dynwell.power = 1
+                            this.darkwell.power = 1
+                            this.dark.lifespan = this.dark.lifespan + 400 * sidx ** 2
+                            
+                            console.log(sidx)
+                            if (sidx == 0) {
+                                this.dark.start()
+                            }
+                            
+                            console.log(this.trialData[this.tridx].seq.length)
+                            if ((sidx+1) == this.trialData[this.tridx].seq.length) {
+                                this.dark.lifespan = 200
+                               // this.darkwell.gravity = 60
+                            }
                             /*
                             const radius = 10 * (sidx + 1);
 
