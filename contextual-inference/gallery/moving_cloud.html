@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimental Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.85.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="game-container"></div>
+
+    <script>
+        var stim_dim_x = 50;
+        var stim_dim_y = 50;
+        var cX = 400;
+        var cY = 300;
+        var r = 200;
+        var particles;
+
+        class ExperimentScene extends Phaser.Scene {
+            constructor() {
+                super('ExperimentScene');
+            }
+
+            preload() {
+                this.load.image('space', '../assets/bg2.jpg');
+                this.load.atlas('flares', '../assets/particles/flares.png', '../assets/particles/flares.json');
+            }
+
+            create() {
+                const blendModes = ['NORMAL', 'ADD', 'MULTIPLY', 'SCREEN', 'ERASE', 'OVERLAY', 'LIGHTEN', 'DARKEN'];
+
+                this.add.image(600, 300, 'space').setDisplaySize(1200, 600);
+                // https://phaser.io/examples/v3.85.0/game-objects/particle-emitter/view/fire-effects
+                
+
+                // Initial position
+                let x = 50;
+                const y = 150;
+                const deltaX = 150;
+
+                // Create particles with different blend modes
+                blendModes.forEach((blendMode, index) => {
+                    const particles = this.add.particles(x + (index * deltaX), y, 'flares', {
+                        frame: [ 'red', 'blue'],
+                        //color: "#27ae60",
+                        x: 0,
+                        y: 0,
+                        lifespan: 10000,
+                        speed: 200,
+                        //angle: 90, // Particles emit straight down.
+                        quantity: 1, // Emit 10 particles per cycle.
+
+                        //radial:true,
+                        scale: { start: 0.3, end: 0 },
+                        //emitZone: {
+                        //    type: 'line',
+                        //   source: new this.Geom.Line(x + (index * deltaX), y, 0, 500) // Emit along a horizontal line.
+                        //},
+                        blendMode: blendMode // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    var well = particles.createGravityWell({
+                        x: 0,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 100
+                    }); 
+             // Optionally, add text to label each blend mode
+                    this.add.text(x + (index * deltaX) - 20, y - 50, blendMode, {
+                        fontSize: '12px',
+                        fill: '#ffffff'
+                    });
+                });
+
+                
+                // different particle numbers
+
+                var i = [1, 2, 3];
+                const particleEmitters = []; // Array to store particle emitters
+
+                i.forEach((x, idx) => {
+                    const dyn = this.add.particles(200 + idx * 170, 300, 'flares', {
+                        frame: ['red', 'blue'],
+                        x: 0,
+                        y: 0,
+                        lifespan: 500 + 1000 * idx ** 2,
+                        speed: 200,
+                        quantity: 1,
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'ERASE' // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+
+                    particleEmitters.push(dyn); // Store reference to emitter
+
+                    const dynwell = dyn.createGravityWell({
+                        x: 0,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 30 //+ 30*idx**3
+                    });
+                });
+
+                // Add text to display lifespan of all emitters
+                const lifespanText = this.add.text(20, 20, `Lifespan: ${particleEmitters[0].config.lifespan}`, {
+                    font: '16px Arial',
+                    fill: '#ffffff'
+                });
+
+                // Add keyboard input to control lifespan
+                this.input.keyboard.on('keydown', (event) => {
+                    if (event.code === 'ArrowUp') {
+                        // Increase lifespan for all emitters
+                        particleEmitters.forEach((emitter) => {
+                            emitter.config.lifespan = Math.min(emitter.config.lifespan + 100, 10000); // Cap at 10000
+                        });
+                        lifespanText.setText(`Lifespan: ${particleEmitters[0].config.lifespan}`);
+                    } else if (event.code === 'ArrowDown') {
+                        // Decrease lifespan for all emitters
+                        particleEmitters.forEach((emitter) => {
+                            emitter.config.lifespan = Math.max(emitter.config.lifespan - 100, 0); // Cap at 0
+                        });
+                        lifespanText.setText(`Lifespan: ${particleEmitters[0].config.lifespan}`);
+                    }
+                });
+
+                
+
+                
+
+
+
+           
+
+
+                 
+                /*
+                flame.start()
+
+                this.time.delayedCall(50, () => {
+                    flame.stop()
+                    //resolve(); // Resolve the promise after the text disappears
+                });
+                */
+
+                //const particles = this.add.particles('sparkle');
+
+
+                
+
+        }
+    }
+
+    const config = {
+        type: Phaser.AUTO,
+        width: 1200,
+        height: 600,
+        backgroundColor: '#000',
+        scene: [ExperimentScene],
+    };
+
+    const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
