@@ -25,6 +25,8 @@
     <div id="game-container"></div>
 
     <script>
+        
+        // run php server locally https://serverfault.com/questions/338394/how-to-run-php-with-simplehttpserver
         var stim_dim_x = 50
         var stim_dim_y = 50
         var im1, im2, im3, im4, im5, im6
@@ -36,13 +38,240 @@
 
         var cX = 400
         var cY = 300
-        var r = 200
+        var r = 150
 
         var trialData
         var seq, td
 
         var targets, t1, t2
 
+        // INTRO SCENE
+        class IntroScene extends Phaser.Scene {
+            constructor() {
+                super('IntroScene');
+            }
+
+            preload() {
+                // Preload assets
+                this.load.image('space', 'assets/nightsky.png');
+                this.load.image('replay', 'assets/replay.png');
+                this.load.image('submit2', 'assets/submit2.png');
+                this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
+                this.load.audio('instr3', 'assets/sound/instructions/instr3.wav');
+                this.load.audio('instr4', 'assets/sound/instructions/instr4.wav');
+                this.load.audio('instr5', 'assets/sound/instructions/instr5.wav');
+                this.load.audio('instr6', 'assets/sound/instructions/instr6.wav');
+                this.load.audio('instr7', 'assets/sound/instructions/instr7.wav');
+                this.load.audio('instr3a', 'assets/sound/instructions/instr3a.wav');
+                this.load.audio('instr3b', 'assets/sound/instructions/instr3b.wav');
+                this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
+            }
+
+            create() {
+                // Set up background
+                this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
+
+                // set up sounds
+                this.instr3 = this.sound.add('instr3');
+
+                // Create the spark particle
+                this.spark = this.add.particles(400, 300, 'flares', {
+                    frame: ['blue'],
+                    x: 0,
+                    y: 0,
+                    lifespan: 600,
+                    speed: 100,
+                    quantity: 1,
+                    scale: { start: 0.3, end: 0 },
+                    blendMode: 'ADD'
+                });
+
+                this.showIntro()
+
+            }
+
+            async showIntro() {
+                await this.veryStart()
+
+                // Start introduction
+                // This will be 10s intro where different shapes will "dance" on th screen
+                this.createGentleMotion();
+
+                this.instr =[] 
+                this.instr.x =400
+                this.instr.y =200
+
+                // do the above for 10s
+                await this.waitFor(2000); // realMode 10000
+                
+
+                // Add instructions 1
+               var txt = this.add.text(this.instr.x, this.instr.y, 'Welcome, please carefully read the consent form \n and press continue if you agree.', {
+                    fontSize: '20px',
+                    fontFamily: 'Arial',
+                    color: '#89e1f2',
+                    align: 'center'
+                }).setOrigin(0.5)
+
+                await this.showInstructionButtons('', 0);
+                txt.destroy()
+
+                this.tweens.add({
+                    targets:  this.intromusic,
+                    volume:   0.2,
+                    duration: 1000 //realMode 5000
+                });
+
+                await this.waitFor(1000); //realMode 3000
+
+                this.tweens.add({
+                    targets:  this.spark,
+                    x:   400,
+                    y: 300,
+
+                    duration: 1000 
+                });
+
+                await this.showInstructionButtons('instr4', 1);
+
+                // Move to ExperimentScene on "Spacebar" key press
+                this.input.keyboard.on('keydown-SPACE', () => {
+                        if (!this.instr3.isPlaying) {                       
+                            this.scene.start('ExperimentScene');
+                        }
+                    });
+                }
+            
+            fakeEnter() {
+                return new Promise((resolve) => {
+                    // Move to ExperimentScene on "Spacebar" key press
+                        this.input.keyboard.on('keydown-ENTER', () => {
+                                resolve()
+                        });
+
+     
+                });
+            }
+
+            veryStart() {
+                return new Promise((resolve) => {
+                    const continueButton = this.add.sprite(400, 300, 'submit2').setInteractive();
+                    continueButton.setDisplaySize(40, 40); // Adjust size as needed
+                    continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
+
+                    // Add instructions 1
+                    this.txt1 = this.add.text(400, 200, 'Take a comfortable seat, put your headphones on, and when ready, press start.', {
+                        fontSize: '20px',
+                        fontFamily: 'Arial',
+                        color: '#bfebfe',
+                        align: 'center'
+                    }).setOrigin(0.5);
+
+                    continueButton.on('pointerdown', () => {
+                        const instructionSound = this.sound.add("instr3a", {volume: 0.5});
+                        instructionSound.play();
+
+                        this.input.keyboard.on('keydown-SPACE', () => {
+                            instructionSound.stop()
+                            this.waitFor(200);
+                            // Remove both buttons
+                            this.intromusic = this.sound.add('intromusic', {volume: 1});
+                            this.intromusic.play();
+                            this.waitFor(500);
+                            continueButton.destroy();
+                            this.txt1.destroy()
+                            resolve()
+                        });
+                    });
+                })
+
+            }
+            waitFor(duration) {
+                return new Promise((resolve) => {
+                    this.time.delayedCall(duration, resolve);
+                });
+            }
+
+            playSound(sound) {
+                return new Promise((resolve) => {
+                    const instructionSound = this.sound.add(sound, {volume: 0.5});
+                        instructionSound.play();
+                        resolve()
+                })
+            }
+            showInstructionButtons(instr_string, sound, key='pointerdown') {
+                console.log(key)
+                return new Promise((resolve) => {
+                    // Add replay button
+                    
+                    const continueButton = this.add.sprite(550, 500, 'submit2').setInteractive();
+                    continueButton.setDisplaySize(40, 40); // Adjust size as needed
+                    continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
+
+                    if (sound>0) {
+                        // /replayButton.destroy()
+                        const replayButton = this.add.sprite(200, 500, 'replay').setInteractive();
+                        replayButton.setDisplaySize(40, 40); // Adjust size as needed
+                        replayButton.preFX.addGlow(0x87CEFA); // Light blue glow
+
+                        // Play the instruction sound initially
+                        const instructionSound = this.sound.add(instr_string, {volume: 0.5});
+                        instructionSound.play();
+
+                        // Replay button logic
+                        replayButton.on(key, () => {
+                            if (instructionSound.isPlaying) {
+                                instructionSound.stop();
+                            }
+                            instructionSound.play();
+                        });
+
+                        continueButton.on(key, () => {
+                            if (instructionSound.isPlaying) {
+                                instructionSound.stop();
+                            }
+                            // Remove both buttons
+                            replayButton.destroy();
+                            continueButton.destroy();
+
+                            resolve();
+                        });
+                    } else {
+                        continueButton.on(key, () => {
+                        // Remove both buttons
+                        continueButton.destroy();
+
+                        resolve();
+                    });
+
+                    }
+                    // Continue button logic
+                    
+                });
+            }
+
+            createGentleMotion() {
+                const padding = 50; // Ensure the spark stays within bounds
+                const randomX = () => Phaser.Math.Between(padding, 800 - padding);
+                const randomY = () => Phaser.Math.Between(padding, 600 - padding);
+
+                const moveSpark = () => {
+                    this.tweens.add({
+                        targets: this.spark, // Correct target reference
+                        x: randomX(),
+                        y: randomY(),
+                        duration: Phaser.Math.Between(4000, 8000), // Smooth motion duration
+                        ease: 'Sine.easeInOut',
+                        onComplete: moveSpark // Recursively call for continuous motion
+                    });
+                };
+
+                moveSpark(); // Start the initial tween
+            }
+        }
+    
+
+        // EXPERIMENT SCENE
         class ExperimentScene extends Phaser.Scene {
             constructor() {
                 super('ExperimentScene');
@@ -51,16 +280,20 @@
 
             preload() {
                 // Preload assets
-                this.load.image('space', 'assets/bg2.jpg');
-                this.load.image('stim1', 'assets/diamond.png');
+                this.load.image('space', 'assets/nightsky.png');
+               
+                this.load.image('stim1', 'assets/potion.png');
                 this.load.image('stim2', 'assets/starfish.png');
-                this.load.image('stim3', 'assets/tree.png');
-                this.load.image('stim4', 'assets/wood.png');
+                this.load.image('stim3', 'assets/diamond.png');
+                this.load.image('stim4', 'assets/crystals.png');
                 this.load.image('stim5', 'assets/stone.png');
-                this.load.image('stim6', 'assets/moon.png');
-                this.load.image('t1', 'assets/target1.png');
-                this.load.image('t2', 'assets/target2.png');
+                this.load.image('stim6', 'assets/letax.png');
+                
+                //this.load.image('t1', 'assets/target1.png');
+                //this.load.image('t2', 'assets/target2.png');
                 this.load.image('submit', 'assets/submit.png');
+                this.load.image('submit2', 'assets/submit2.png');
+                this.load.image('handle', 'assets/gps.png');
                 this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
 
 
@@ -74,33 +307,18 @@
                 this.cfg.tar_alpha_baseline = 0.1
 
                 // Background setup
-                //this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
+                this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
 
-                // Bursting flame effect from the center
-                this.flame = this.add.particles(400, 300, 'flares',
-                {
-                    frame: 'white',
-                    color: [ 0xfacc22, 0xf89800, 0xf83600, 0x9f0404 ],
-                    colorEase: 'quad.out',
-                    lifespan: 600,
-                    angle: { min: 0, max: 360 },
-                    scale: { start: 0.2, end: 0, ease: 'sine.out' },
-                    speed: 250,
-                    quantity: 3,
-                    //advance: 50,
-                    blendMode: 'ERASE', 
-                    emitting: false
-                }).setDepth(2);
-                this.flame.stop()
 
                 // Particles for target 
                 this.dark = this.add.particles(400, 300, 'flares', {
-                            frame: ['green'],
+                            frame: ['white'],
+                            color: [0x909497],
                             lifespan: 500,
                             speed: 200,
                             quantity: 2,
                             scale: { start: 0.25, end: 0.1 },
-                            blendMode: 'ERASE',
+                            blendMode: 'SCREEN',
                         }), 
 
                 this.darkwell = this.dark.createGravityWell({
@@ -115,23 +333,26 @@
                 this.target_particles = [
                     {   // Green particles for target 1
                         dyn: this.add.particles(400, 300, 'flares', {
-                            frame: ['green'],
+                            frame: ['white'],
+                            color: [0xe74c3c], 
                             lifespan: 2000,
                             speed: 200,
                             quantity: 2,
-                            scale: { start: 0.2, end: 0 },
-                            blendMode: 'MULTIPLY',
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'SCREEN',
                         }),
                         dynwell: null // Will be set later
                     },
                     {   // Red particles for target 2
                         dyn: this.add.particles(400, 300, 'flares', {
-                            frame: ['red'],
+                            frame: ['white'],
+                            //color: [0x45b39d], $ nicegreenblue
+                            color: [0x5dade2],
                             lifespan: 2000,
                             speed: 200,
                             quantity: 2,
-                            scale: { start: 0.2, end: 0 },
-                            blendMode: 'MULTIPLY',
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'SCREEN',
                         }),
                         dynwell: null // Will be set later
                     }
@@ -177,20 +398,26 @@
 
                 // Create group from contextual cues
                 this.stimGr = this.add.group(); // Create a group
-
+                const jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0];
+             
                 // Add 6 images at 60-degree increments
+  
+                //var jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0]
                 for (let i = 0; i < 6; i++) {
                     let angle = Phaser.Math.DegToRad(i * 60); // Convert degrees to radians
                     let x = cX + r * Math.cos(angle);
                     let y = cY + r * Math.sin(angle);
 
                     // Create an image and add it to the group
-                    let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
-                    image.setAlpha(this.cfg.ctx_alpha_baseline);
-                    this.stimGr.add(image);
+                    //let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y);
+                    let spr = this.add.sprite(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
+                    spr.setAlpha(this.cfg.ctx_alpha_baseline);
+                    spr.postFX.addGlow(0x283747, 4, 0);
+                    // blue 0xaeb6bf
+                    this.stimGr.add(spr);
                 }
-                
-                // Create group from contextual cues
+      
+                /* Create group from contextual cues
                 this.tarGr = this.add.group(); // Create a group
 
                 // Add 2 targets
@@ -200,7 +427,7 @@
                     this.tarGr.add(tim); 
                 }
                 //targets["t2"].setAlpha(0.8)
-
+                */
                 // create gradient texture
                 const sliderWidth = 300;
                 const sliderHeight = 10;
@@ -210,9 +437,9 @@
                     const gradientCtx = gradientTexture.context;
 
                     const grd = gradientCtx.createLinearGradient(0, 0, sliderWidth, 0);
-                    grd.addColorStop(0, 'crimson');
+                    grd.addColorStop(0, '#8e44ad');
                     grd.addColorStop(0.5, 'gray');
-                    grd.addColorStop(1, '#28b463');
+                    grd.addColorStop(1, '#16a085');
 
                     gradientCtx.fillStyle = grd;
                     gradientCtx.fillRect(0, 0, sliderWidth, sliderHeight);
@@ -243,7 +470,8 @@
                 this.timing.ctx_all = [...this.timing.ctx_onsets, ...this.timing.ctxs_offset]
                 this.timing.target_dur = 1000
                 this.timing.iti = 2000
-                this.timing.isi = 1000
+                this.timing.isi1 = 1000
+                this.timing.isi2 = 1000
 
                 for (let i = 0; i < this.notrials-1; i++) {
 
@@ -266,7 +494,7 @@
                     // Get sequence for this trial
                     this.trialData[this.tridx].seq = [];
                     for (let j = 1; j <= 3; j++) {
-                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10);
+                        let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10) - 1; // -1 because the positions start at 1, not 0
                         this.trialData[this.tridx].seq.push(stimPosition);
                     }
                     console.log("   Sequence: " + this.trialData[this.tridx].seq);
@@ -275,7 +503,18 @@
                     await this.showCtxtCues(this.trialData[this.tridx].seq);
                     
                     this.dark.lifespan = 200
-                    await this.waitFor(500+ Math.random() * 5000);
+
+                    // Show text
+                    this.showText("Particle incoming!", 400, 100, "18px")
+
+                    // ISI 1
+                    await this.waitFor(this.timing.isi1)//+ Math.random() * 5000);
+
+                    
+
+                    // Cosmic particle animation
+                    await this.animateCosmicParticle();
+                    this.txt.destroy()
 
                     // show the color of the target
                     this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
@@ -295,8 +534,8 @@
                     
                     this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
                     
-                    // ISI
-                    await this.waitFor(this.timing.isi);
+                    // ISI 2
+                    await this.waitFor(this.timing.isi2);
                     this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
 
                     // Show outcome text
@@ -307,25 +546,80 @@
                         child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
                     });
                     
-                    this.tarGr.children.each((child) => { 
-                        child.alpha = this.cfg.tar_alpha_baseline;
-                    });
-                    
-                     //   ["t"+this.trialData[this.tridx].target].setAlpha(this.cfg.tar_alpha_baseline);
 
                     await this.waitFor(this.timing.iti);
                     this.tridx += 1;
+
+                    if (this.tridx >= this.notrials - 1) {
+                        this.sendTrialData(); // Save the data after the last trial
+                    }
                 }
             }
+            showText(text, x, y, size) {
+                this.txt = this.add.text(x, y, text, {
+                            fontSize: size,
+                            fontFamily: 'Arial',
+                            color: "#87D8FC",
+                            align: 'center',
+                        }).setOrigin(0.5);
+                }
+            animateCosmicParticle() {
+                return new Promise((resolve) => {
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY;
+
+                    // Get the target index and corresponding color
+                    const targetIndex = this.trialData[this.tridx].target - 1; // Target index (0 or 1)
+                    const targetColor = targetIndex === 0 ? 0xe74c3c : 0x45b39d; // Example colors for two targets
+
+                    // Create the cosmic particle
+                    const cosmicParticle = this.add.particles(centerX, 0, 'flares', {
+                        frame: ['white'],
+                        color: [targetColor],
+                        lifespan: 300,
+                        speed: 10, // No initial speed; we move it via tween
+                        quantity: 1,
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'ADD',
+                    });
+
+                    cosmicParticle.start()
+                    // Tween to move the particle down to the center
+                    this.tweens.add({
+                        targets: cosmicParticle,
+                        props: {
+                            x: { value: centerX },
+                            y: { value: centerY },
+                        },
+                        duration: 350, // Adjust for the desired speed
+                        ease: 'Linear',
+                        onComplete: () => {
+                            // Stop the particle emission upon reaching the target
+                            cosmicParticle.stop();
+
+                            // Change the target's particle color to match the cosmic particle
+                            this.target_particles[targetIndex].dyn.color = targetColor;
+
+                            // Destroy the particle system after the effect
+                            cosmicParticle.destroy();
+
+                            // Continue the trial
+                            resolve();
+                        },
+                    });
+                });
+            }
+            
 
             showOutcomeText(outcome) {
                 return new Promise((resolve) => {
                     const centerX = this.cameras.main.centerX;
-                    const centerY = this.cameras.main.centerY - 70;
+                    const centerY = this.cameras.main.centerY;
 
                     // Determine glow color based on the outcome
-                    const glowHexColor = outcome > 0 ? '#28b463' : '#8B0000';
-                    const txtColor = outcome > 0 ? '#abebc6' : '#fadbd8';
+                    const glowHexColor = outcome > 0 ? '#16a085': '#8e44ad';
+                    const txtColor = outcome > 0 ? '#a3e4d7' : '#d7bde2';
+                    //["#8e44ad", "#16a085"]
 
                     // Add the outcome text
                     const outcomeText = this.add.text(centerX, centerY, `${outcome} points!`, {
@@ -433,24 +727,38 @@
             const sliderHandleHeight = 25; // Slider handle height
 
             const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY + 80; // Position slightly below the target
+            const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
 
             this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
             this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
 
             // Add the slider handle
-            this.handle = this.add.rectangle(centerX, centerY, sliderHandleWidth, sliderHandleHeight, 0x000000).setInteractive();
-            //this.handle.preFX.addGlow('yellow')
+            //this.handle = this.add.rectangle( sliderHandleWidth, sliderHandleHeight, 0x000000).setInteractive();
+            this.handle = this.add.sprite(centerX, centerY-15, 'handle').setDisplaySize(30, 30).setInteractive(); 
+             //       spr.setAlpha(this.cfg.ctx_alpha_baseline);
+              //      spr.postFX.addGlow(0xaeb6bf, 4, 0);
+            //this.handle.preFX.addGlow(0x5dade2)
             //this.handle.setDepth(2);
 
             this.input.setDraggable(this.handle);
 
             // Add text to display the rating above the slider
-            this.ratingText = this.add.text(centerX, centerY - 25, 'Expected outcome: 0', {
-                fontSize: '18px',
-                color: '#ffffff',
-            }).setOrigin(0.5);
+            this.ratingText = this.add.text(centerX-150, centerY + 30, 'Expected: 0', {
+                fontSize: '14px',
+                color: "#5dade2"
+            })
 
+            // Add text to display the rating above the slider
+            this.lbl1 = this.add.text(centerX-150, centerY - 25, 'Worst', {
+                fontSize: '14px',
+                color: "#8e44ad"
+            });
+
+            this.lbl2 = this.add.text(centerX+118, centerY - 25, 'Best', {
+                fontSize: '14px',
+                color: "#16a085"
+            });
+            // ["#8e44ad", "#16a085"]
             // Drag functionality for the slider handle
             this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
                 if (gameObject === this.handle) {
@@ -460,7 +768,7 @@
                     // Map handle position to -100 to 100
                     const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
                     const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
-                    this.ratingText.setText(`Expected outcome: ${rating}`);
+                    this.ratingText.setText(`Expected yield: ${rating}`);
                     this.currentRating = rating; // Store the current rating
 
 
@@ -468,9 +776,11 @@
             });
 
             // Add the submit button as an image
-            this.submitButton = this.add.image(centerX, centerY + 40, 'submit').setInteractive();
+            this.submitButton = this.add.sprite(centerX+50, centerY + 35, 'submit2').setInteractive();
             let scalefac = 5
-            this.submitButton.setDisplaySize(512/scalefac, 302/scalefac); // Adjust size as needed
+            this.submitButton.setDisplaySize(40, 40); // Adjust size as needed
+            this.submitButton.preFX.addGlow(0x5dade2)
+            //this.submitButton.setDisplaySize((512/scalefac)-20, 302/scalefac); // Adjust size as needed
 
             this.submitButton.on('pointerdown', () => {
                 console.log('Submitted rating:', this.currentRating);
@@ -489,8 +799,119 @@
             this.handle.destroy();
             this.ratingText.destroy();
             this.submitButton.destroy();
+            this.lbl1.destroy()
+            this.lbl2.destroy()
         }
 
+        extendLineAndDrawCircle(stimPos, sidx) {
+            return new Promise((resolve) => {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
+
+                // Get the stimulus position
+                const stim = this.stimGr.getChildren()[stimPos];
+                const stimX = stim.x;
+                const stimY = stim.y;
+
+                // Calculate the center between the stimulus and the center
+                const center = {
+                    x: (stimX + centerX) / 2,
+                    y: (stimY + centerY) / 2,
+                };
+
+                // Create the sparkle particle
+                const spark = this.add.particles(center.x, center.y, 'flares', {
+                    frame: ['yellow'],
+                    lifespan: 100,
+                    speed: 150,
+                    quantity: 1,
+                    scale: { start: 0.2, end: 0 },
+                    blendMode: 'ADD',
+                });
+
+                // Define the line path for the sparkle
+                const linePath = new Phaser.Geom.Line(stimX, stimY, centerX, centerY);
+                spark.addEmitZone({
+                    type: 'edge',
+                    source: linePath,
+                    quantity: 1,
+                    total: 1,
+                });
+
+                // Start the sparkle and wait for it to reach the center
+                spark.start();
+
+                // Animate the sparkle travel
+                const travelDuration = 400; // Adjust as needed for speed
+                const sparkleTween = this.tweens.add({
+                    targets: spark,
+                    x: centerX,
+                    y: centerY,
+                    duration: travelDuration,
+                    onComplete: () => {
+                        // Stop sparkle emission
+                        spark.stop();
+
+                        this.target_particles[this.trialData[this.tridx].target-1].dynwell.power = 1
+                        this.darkwell.power = 1
+                        this.dark.lifespan +=  400 * sidx ** 2
+                        
+                        console.log(sidx)
+                        if (sidx == 0) {
+                            this.dark.start()
+                        }
+                        
+                        console.log(this.trialData[this.tridx].seq.length)
+                        if ((sidx+1) == this.trialData[this.tridx].seq.length) {
+                            this.dark.lifespan = 200
+                            // this.darkwell.gravity = 60
+                        }
+
+                        // Handle the "dark" particle effect logic
+                        if (sidx === 0) {
+                            // Start "dark" particles for the first stimulus
+                            this.dark.start();
+                        }
+
+
+                        // Resolve the promise after the sparkle reaches the center
+                        resolve();
+                    },
+                });
+            });
+        }
+
+        sendTrialData() {
+            const outdata = {partial: false, subid: "subtest", data: this.trialData} 
+            this.postData(JSON.stringify(outdata));
+
+        }
+
+        postData(data) {
+            console.log(data)
+            console.log('entered postData');
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'save_data.php', true); // change 'write_data.php' to point to php script.
+            xhr.setRequestHeader('Content-Type', 'application/json');
+        
+            xhr.addEventListener('readystatechange', function(e) {
+                if( this.readyState === 4 ) {
+                    console.log(xhr.responseText)
+                    console.log('bye')
+                    //window.location.replace("http://www.thebestdinosaur.com")
+                    //window.location.replace("https://app.prolific.co/submissions/complete?cc="+completion_code)
+                    //window.location.replace("https://survey.academiccloud.de/index.php/614246?lang=en&PROLIFIC_PID="+prolific_pid)
+
+                }});
+            
+            //console.log(data);
+            xhr.send(data);
+  
+  
+      }
+
+}
+/*
         extendLineAndDrawCircle(stimPos, sidx) {
             return new Promise((resolve) => {
                 const centerX = this.cameras.main.centerX;
@@ -511,26 +932,49 @@
 
                 let currentLength = 0;
 
-                var spark = this.add.particles(700, 300, 'flares', {
+                let center = [];
+                center.x = (stim.x + centerX)/2
+                center.y = (stim.y + centerY)/2
+
+                var spark = this.add.particles(center.x, center.y, 'flares', {
                         frame: [ 'yellow'],
                         x: 0,
                         y: 0,
-                        lifespan: 200,
+                        lifespan: 100,
                         speed: 200,
                         quantity: 1,
-                        scale: { start: 0.3, end: 0 },
-                        blendMode: 'SCREEN'//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'ADD'//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
                     });
                 // Add particles to emit along the circle
-                linePath = new Phaser.Geom.Line(stim.x, stim.y, centerX, centerY);
+                console.log('Line Start:', stim.x, stim.y, 'Line End:', centerX, centerY);
+                //const linecoord = new Phaser.Geom.Line(stim.x, stim.y, centerX, centerY);
+                const linePath = new Phaser.Geom.Line(center.x-centerX, center.y-centerY, center.x-stim.x, center.y-stim.y);
                 spark.addEmitZone({
                     type: 'edge',
-                    source: linePath,
+                    source:  linePath,
                     quantity: 64,
                     total: 1,
                 });
+                spark.start()
+                
 
+                this.target_particles[this.trialData[this.tridx].target-1].dynwell.power = 1
+                this.darkwell.power = 1
+                this.dark.lifespan = this.dark.lifespan + 400 * sidx ** 2
+                
+                console.log(sidx)
+                if (sidx == 0) {
+                    this.dark.start()
+                }
+                
+                console.log(this.trialData[this.tridx].seq.length)
+                if ((sidx+1) == this.trialData[this.tridx].seq.length) {
+                    this.dark.lifespan = 200
+                    // this.darkwell.gravity = 60
+                }
 
+                /*
                 // Animate the line extension
                 const lineTween = this.time.addEvent({
                     delay: 16, // Run every 16ms (~60 FPS)
@@ -573,7 +1017,7 @@
                             circleGraphics.fillStyle(0x000000, 1); // Black filled circle
                             circleGraphics.fillCircle(centerX, centerY, radius);
                             this.circleGraphicsArray.push(circleGraphics);
-                            */
+                            
                            
                                         
                             lineGraphics.destroy()
@@ -587,18 +1031,19 @@
             });
         }
 
-
+                
+*/
 
     
-    }
+    
         
 
         const config = {
             type: Phaser.AUTO,
             width: 800,
             height: 600,
-            backgroundColor: '#f5eef8',
-            scene: [ExperimentScene],
+            backgroundColor: '#2c3e50',
+            scene: [IntroScene, ExperimentScene]
         };
 
         const game = new Phaser.Game(config);

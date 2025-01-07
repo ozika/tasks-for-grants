@@ -287,8 +287,8 @@
                         frame: frame,
                         x: 0,
                         y: 0,
-                        lifespan: lifespan+200,
-                        speed: speed,
+                        lifespan: lifespan+500,
+                        speed: speed+50,
                         quantity: quantity,
                         scale: { start: size, end: 0 },
                         blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
@@ -296,23 +296,23 @@
                     var gr4 = 30
                     const sh4well = sh4.createGravityWell({
                         x: 0,
-                        y: -40,
+                        y: -60,
                         power: 1,
                         epsilon: 80,
-                        gravity: gr4*1.2 //+ 30*idx**3
+                        gravity: gr4*1.3 //+ 30*idx**3
                     });
 
                     const sh4well2 = sh4.createGravityWell({
-                        x: -50,
-                        y: 40,
+                        x: -35,
+                        y: 20,
                         power: 1,
                         epsilon: 80,
                         gravity: gr4*1 //+ 30*idx**3
                     });
 
                     const sh4well3 = sh4.createGravityWell({
-                        x: 50,
-                        y: 40,
+                        x: 35,
+                        y: 20,
                         power: 1,
                         epsilon: 80,
                         gravity: gr4*1 //+ 30*idx**3
@@ -328,44 +328,37 @@
                         x: 0,
                         y: 0,
                         lifespan: 500,
-                        speed: 60,
+                        speed: 30,
                         quantity: quantity,
                         scale: { start: size, end: 0 },
                         blendMode: bmode, // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
                     });
                     //sh5.addEmitZone({ speed:20, type: 'edge', source: new Phaser.Geom.Circle(0, 0, 30), quantity: 64, total: 1 });
                     // Define the circular path
-                    const circlePath = new Phaser.Geom.Circle(0, 0, 1);
+                    const circlePath = new Phaser.Geom.Circle(0, 0, 10);
+                    const linePath = new Phaser.Geom.Line(-30, -30, 30, 30);
+                    const rect = new Phaser.Geom.Rectangle(-15, -15, 15, 15);
 
                     // Add particles to emit along the circle
                     sh5.addEmitZone({
                         type: 'edge',
-                        source: circlePath,
+                        source: rect,
                         quantity: 64,
                         total: 1,
                     });
-
-                    // Animate the emitter moving along the circle
-                    let angle = 0;
-                    const moveSpeed = 0.01; // Lower this value for slower movement
-                    this.time.addEvent({
-                        delay: 16, // Adjust frame rate for smooth movement
-                        loop: true,
-                        callback: () => {
-                            angle += moveSpeed;
-                            if (angle >= Math.PI * 2) {
-                                angle -= Math.PI * 2; // Keep angle within 0 to 2π
-                            }
-                            const x = circlePath.x + 30 * Math.cos(angle);
-                            const y = circlePath.y + 30 * Math.sin(angle);
-                            sh5.setPosition(500 + x, 500 + y); // Update emitter position
-                        },
+                    const sh5well = sh5.createGravityWell({
+                        x: 0,
+                        y: 0,
+                        power: 1,
+                        epsilon: 80,
+                        gravity: 80 //+ 30*idx**3
                     });
+
 
                     sh5.on('complete', () => {
 
-
-                        sh5.start();
+//
+  //                      sh5.start();
 
                     });
 
@@ -440,6 +433,41 @@
                         epsilon: 80,
                         gravity: 150 //+ 30*idx**3
                     });
+
+                    // stim8 
+                    const sh8 = this.add.particles(800, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan+1500,
+                        speed: 2,
+                        quantity: 2,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+                    const shape1 = new Phaser.Geom.Rectangle(-25, -25, 50, 50);
+
+                    sh8.addEmitZone({ type: 'random', source: shape1 });
+
+
+                    // stim9
+                    const sh9 = this.add.particles(900, 500, 'flares', {
+                        frame: frame,
+                        x: 0,
+                        y: 0,
+                        lifespan: lifespan+1000,
+                        speed: 2,
+                        quantity: 2,
+                        scale: { start: size, end: 0 },
+                        blendMode: bmode//blend[idx] // NORMAL/ADD/MULTIPLY/SCREEN/ERASE/OVERLAY/LIGHTEN/DARKEN
+                    });
+                    const tri = new Phaser.Geom.Triangle( -20, 30, 20, 30, 0, -30);
+
+                    sh9.addEmitZone({ type: 'random', source: tri });
+
+                    
+          
+                    
 
            
 

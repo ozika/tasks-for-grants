@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glowing shapes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.85.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="game-container"></div>
+
+    <script>
+        var stim_dim_x = 50;
+        var stim_dim_y = 50;
+        var cX = 400;
+        var cY = 300;
+        var r = 200;
+        var particles;
+
+        class ExperimentScene extends Phaser.Scene {
+            constructor() {
+                super('ExperimentScene');
+            }
+
+            preload() {
+                this.load.image('space', '../assets/bg2.jpg');
+                this.load.atlas('flares', '../assets/particles/flares.png', '../assets/particles/flares.json');
+            }
+
+            create() {
+                this.load.script('glow', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser-examples@master/examples/assets/shaders/blur.js');
+
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0xff0000, 1); // Red color
+                graphics.fillCircle(400, 300, 50); // Draw a circle
+
+                // Convert graphics to texture
+                graphics.generateTexture('circleGlow', 100, 100);
+                graphics.destroy(); // Destroy the original graphics
+
+                const circle = this.add.image(400, 300, 'circleGlow');
+                circle.setScale(2); // Scale up the texture
+
+                // Add a glow filter
+                this.add.filter(circle, {
+                    type: 'BlurFilter',
+                    blur: 8, // Amount of glow
+                    quality: 4,
+                });
+            }
+        
+        }
+
+    const config = {
+        type: Phaser.AUTO,
+        width: 1200,
+        height: 600,
+        backgroundColor: '#000',
+        scene: [ExperimentScene],
+    };
+
+    const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
