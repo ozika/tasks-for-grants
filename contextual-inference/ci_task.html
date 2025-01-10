@@ -62,9 +62,37 @@
                 this.load.audio('instr5', 'assets/sound/instructions/instr5.wav');
                 this.load.audio('instr6', 'assets/sound/instructions/instr6.wav');
                 this.load.audio('instr7', 'assets/sound/instructions/instr7.wav');
+                this.load.audio('instr8', 'assets/sound/instructions/instr8.wav');
+                this.load.audio('instr8b', 'assets/sound/instructions/instr8b.wav');
+                this.load.audio('instr8c', 'assets/sound/instructions/instr8c.wav');
+                this.load.audio('instr8d', 'assets/sound/instructions/instr8d.wav');
+                this.load.audio('instr9', 'assets/sound/instructions/instr9.wav');
+                this.load.audio('instr10', 'assets/sound/instructions/instr10.wav');
+                this.load.audio('instr11', 'assets/sound/instructions/instr11.wav');
+                this.load.audio('instr12', 'assets/sound/instructions/instr12.wav');
+                this.load.audio('instr13', 'assets/sound/instructions/instr13.wav');
+                this.load.audio('instr14', 'assets/sound/instructions/instr14.wav');
+                this.load.audio('instr15', 'assets/sound/instructions/instr15.wav');
+                this.load.audio('instr16', 'assets/sound/instructions/instr16.wav');
                 this.load.audio('instr3a', 'assets/sound/instructions/instr3a.wav');
                 this.load.audio('instr3b', 'assets/sound/instructions/instr3b.wav');
                 this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
+                this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
+                this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
+                this.load.audio('evee_swish', 'assets/sound/effects/evee_swish.wav');
+                this.load.audio('spark', 'assets/sound/effects/spark1.wav');
+                this.load.audio('particle', 'assets/sound/effects/particle.wav');
+                this.load.audio('engain', 'assets/sound/effects/energygain2.wav');
+                this.load.audio('enloss', 'assets/sound/effects/energyloss.wav');
+
+                this.load.image('stim1', 'assets/potion.png');
+                this.load.image('stim2', 'assets/starfish.png');
+                this.load.image('stim3', 'assets/diamond.png');
+                this.load.image('stim4', 'assets/crystals.png');
+                this.load.image('stim5', 'assets/stone.png');
+                this.load.image('stim6', 'assets/letax.png');
+                this.load.image('handle', 'assets/gps.png');
+                this.load.image('outcm-handle', 'assets/gps2.png');
             }
 
             create() {
@@ -73,6 +101,10 @@
 
                 // set up sounds
                 this.instr3 = this.sound.add('instr3');
+                this.sparksound = this.sound.add('spark', {volume: 0.5});
+                this.particlesound = this.sound.add('particle', {volume: 0.5})
+                this.engain = this.sound.add('engain', {volume: 0.5})
+                this.enloss = this.sound.add('enloss', {volume: 0.5});
 
                 // Create the spark particle
                 this.spark = this.add.particles(400, 300, 'flares', {
@@ -85,6 +117,83 @@
                     scale: { start: 0.3, end: 0 },
                     blendMode: 'ADD'
                 });
+                this.spark.wellactive = false
+
+                // Particles for target 
+                this.dark = this.add.particles(400, 300, 'flares', {
+                            frame: ['white'],
+                            color: [0x909497],
+                            lifespan: 500,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'SCREEN',
+                        }), 
+
+                this.darkwell = this.dark.createGravityWell({
+                            x: 0,
+                            y: 0,
+                            power: 1,
+                            epsilon: 80,
+                            gravity: 30,
+                        });
+                this.dark.stop()
+
+                this.target_particles = [
+                    {   // Green particles for target 1
+                        dyn: this.add.particles(400, 300, 'flares', {
+                            frame: ['white'],
+                            color: [0xe74c3c], 
+                            lifespan: 2000,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'SCREEN',
+                        }),
+                        dynwell: null // Will be set later
+                    },
+                    {   // Red particles for target 2
+                        dyn: this.add.particles(400, 300, 'flares', {
+                            frame: ['white'],
+                            //color: [0x45b39d], $ nicegreenblue
+                            color: [0x5dade2],
+                            lifespan: 2000,
+                            speed: 200,
+                            quantity: 2,
+                            scale: { start: 0.25, end: 0.1 },
+                            blendMode: 'SCREEN',
+                        }),
+                        dynwell: null // Will be set later
+                    }
+                ];
+                // Stop particle systems and create gravity wells
+                this.target_particles.forEach((particle) => {
+                        particle.dyn.stop();
+                        particle.dynwell = particle.dyn.createGravityWell({
+                            x: 0,
+                            y: 0,
+                            power: 1,
+                            epsilon: 80,
+                            gravity: 30,
+                        });
+                    });
+
+                    const sliderWidth = 300;
+                const sliderHeight = 10;
+
+                if (!this.textures.exists('gradient')) {
+                    const gradientTexture = this.textures.createCanvas('gradient', sliderWidth, sliderHeight);
+                    const gradientCtx = gradientTexture.context;
+
+                    const grd = gradientCtx.createLinearGradient(0, 0, sliderWidth, 0);
+                    grd.addColorStop(0, '#8e44ad');
+                    grd.addColorStop(0.5, 'gray');
+                    grd.addColorStop(1, '#16a085');
+
+                    gradientCtx.fillStyle = grd;
+                    gradientCtx.fillRect(0, 0, sliderWidth, sliderHeight);
+                    gradientTexture.refresh();
+                }
 
                 this.showIntro()
 
@@ -95,6 +204,7 @@
 
                 // Start introduction
                 // This will be 10s intro where different shapes will "dance" on th screen
+                this.gentlemotion = 1
                 this.createGentleMotion();
 
                 this.instr =[] 
@@ -102,7 +212,7 @@
                 this.instr.y =200
 
                 // do the above for 10s
-                await this.waitFor(2000); // realMode 10000
+                await this.waitFor(10000); // realMode 10000
                 
 
                 // Add instructions 1
@@ -115,33 +225,714 @@
 
                 await this.showInstructionButtons('', 0);
                 txt.destroy()
+                
 
                 this.tweens.add({
                     targets:  this.intromusic,
-                    volume:   0.2,
-                    duration: 1000 //realMode 5000
+                    volume:   0.05,
+                    duration: 5000 //realMode 5000
+                    
                 });
+
+                await this.stopGentleMotion()
 
                 await this.waitFor(1000); //realMode 3000
 
-                this.tweens.add({
-                    targets:  this.spark,
-                    x:   400,
-                    y: 300,
-
-                    duration: 1000 
-                });
-
+                await this.moveAndShowEvee(400, 300, 1200);
+                
                 await this.showInstructionButtons('instr4', 1);
 
-                // Move to ExperimentScene on "Spacebar" key press
-                this.input.keyboard.on('keydown-SPACE', () => {
-                        if (!this.instr3.isPlaying) {                       
-                            this.scene.start('ExperimentScene');
-                        }
-                    });
+                this.tweens.add({
+                    targets:  this.intromusic,
+                    volume:   0.03,
+                    duration: 5000 //realMode 5000
+                    
+                });
+
+                await this.makeEvePuff()
+
+                await this.moveAndShowEvee(100, 300, 1600);
+
+                await this.showInstructionButtons('instr5', 1);
+
+                await this.makeEvePuff()
+
+                await this.moveAndShowEvee(700, 300, 1600);
+
+                await this.showInstructionButtons('instr6', 1);
+
+                this.showStimuli();
+
+                await this.showInstructionButtons('instr7', 1);
+
+                await this.pingSparkles(1, 0);
+
+                //await this.pingSparkles(4, 1);
+
+                //await this.pingSparkles(0, 2);
+
+                await this.moveAndShowEvee(500, 100, 1600);
+
+                await this.showInstructionButtons('instr8', 1);
+
+                await this.animateCosmicParticle()
+                this.target_particles[0].dyn.start()
+                //await this.makeEvePuff(2,200)
+
+                this.darkwell.gravity=100
+                await this.waitFor(1000); 
+
+                
+                this.darkwell.gravity=30
+                this.dark.stop()
+                
+
+                
+                await this.moveAndShowEvee(550, 100, 1600);
+
+                await this.showInstructionButtons('instr8b', 1);
+
+                this.target_particles[0].dyn.stop()
+                await this.showOutcomeText(80)
+
+                await this.showInstructionButtons('instr8c', 1);
+
+                await this.pingSparkles(1, 0);
+                this.darkwell.gravity=30
+                this.dark.start()
+                
+                await this.waitFor(1000); 
+                
+                this.darkwell.gravity=100
+
+                
+                
+                await this.animateCosmicParticle(1)
+                this.target_particles[1].dyn.start()
+                this.darkwell.gravity=30
+                this.dark.stop()
+                
+                //await this.makeEvePuff(2,200)
+
+                
+                
+
+                await this.showOutcomeText(-80)
+
+                await this.showInstructionButtons('instr8d', 1);
+
+                this.target_particles[1].dyn.stop()
+
+
+                await this.makeEvePuff()
+                await this.moveAndShowEvee(100, 200, 1600);
+                await this.showInstructionButtons('instr9', 1);
+
+                await this.makeEvePuff()
+                await this.showInstructionButtons('instr10', 1);
+
+                await this.makeEvePuff(2, 300)
+                await this.showInstructionButtons('instr11', 1);
+
+                await this.moveAndShowEvee(700, 500, 1600);
+
+                for (let i = 0; i < 6; i++) { 
+                    this.stimGr.getChildren()[i].alpha=0.2;
+                    await this.waitFor(100); 
                 }
+
+                // practice trial 1 
+                await this.waitFor(1000); 
+                
+                this.stimGr.getChildren()[1].alpha=1;
+                await this.waitFor(500); 
+                await this.pingSparkles(1, 0);
+                await this.waitFor(1000); 
+                this.stimGr.getChildren()[2].alpha=1;
+                await this.waitFor(500); 
+                await this.pingSparkles(2, 0);
+                await this.waitFor(1000); 
+                this.stimGr.getChildren()[4].alpha=1;
+                await this.waitFor(500); 
+                await this.pingSparkles(4, 0);
+                await this.waitFor(1000); 
+
+                await this.animateCosmicParticle(1)
+                this.darkwell.gravity=100
+                await this.waitFor(1000);                
+                this.darkwell.gravity=30
+                this.dark.stop()
+                this.target_particles[1].dyn.start()
+
+                this.createSlider() 
+
+                await this.waitForSliderInput();                  
+                this.target_particles[1].dyn.stop()
+                
+                // ISI 2
+                await this.waitFor(1000);
+                //this.target_particles[1].dynwell.gravity = 0
+
+                // Show outcome text
+                await this.showOutcomeMarker(this.currentRating-10);
+                await this.removeSlider();
+                this.outcmhandle.destroy()
+
+                // Change alpha back to baseline
+                this.stimGr.children.each((child) => {
+                    child.alpha = 0.2; // Set alpha to baseline
+                });
+
+                await this.makeEvePuff(2, 300)
+                await this.showInstructionButtons('instr12', 1);
+
+
+                var stims = [[1,3,5], [2,0,3], [3,2,5]]
+                var tt = [1,0,1]
+                var outcm = [-30, -70, 80]
+                var practiceTrials = 1
+                for (let i = 0; i < practiceTrials; i++) { 
+                    for (let i = 0; i < 6; i++) { 
+                        this.stimGr.getChildren()[i].alpha=0.2;
+                        await this.waitFor(100); 
+                    }
+
+                    // practice trial 1 
+                    await this.waitFor(1000); 
+                    
+                    for (let j = 0; j < 3; j++) { 
+                        this.stimGr.getChildren()[stims[i][j]].alpha=1;
+                        await this.waitFor(500); 
+                        await this.pingSparkles(stims[i][j], 0);
+                        await this.waitFor(1000); 
+
+                    }
+                    await this.animateCosmicParticle(tt[i])
+                    this.darkwell.gravity=100
+                    await this.waitFor(1000);                
+                    this.darkwell.gravity=30
+                    this.dark.stop()
+                    this.target_particles[tt[i]].dyn.start()
+
+                    this.createSlider() 
+
+                    await this.waitForSliderInput();                  
+                    this.target_particles[tt[i]].dyn.stop()
+                    
+                    // ISI 2
+                    await this.waitFor(1000);
+                    //this.target_particles[1].dynwell.gravity = 0
+
+                    // Show outcome text
+                    await this.showOutcomeMarker(outcm[i]);
+
+                    await this.removeSlider();
+
+                    this.outcmhandle.destroy()
+
+                    // Change alpha back to baseline
+                    this.stimGr.children.each((child) => {
+                        child.alpha = 0.2; // Set alpha to baseline
+                    });
+
+                }
+                this.tweens.add({
+                    targets:  this.intromusic,
+                    volume:   0,
+                    duration: 10000 //realMode 5000
+                    
+                });
+
+                this.makeEvePuff()
+                await this.showInstructionButtons('instr13', 1);
+
+                await this.showInstructionButtons('instr14', 1);
+                
+                this.moveAndShowEvee(560, 150, 600);
+
+                await this.showInstructionButtons('instr15', 1);
+
+                await this.showInstructionButtons('instr16', 1);
+
+                this.sound.stopAll(); // Stop all playing sounds
+                this.buildup = this.sound.add('buildup', {volume: 1});
+                this.buildup.play();
+
+                
+                
+
+                this.countdown()
+                await this.waitFor(500);
+
+                this.makeEvePuff(2, 200)
+                await this.moveAndShowEvee(550, 250, 600);
+                this.makeEvePuff(2, 200)
+                await this.moveAndShowEvee(200, 200, 600);
+                this.makeEvePuff(2, 200)
+                await this.moveAndShowEvee(400, 500, 600);
+                this.makeEvePuff(2, 200)
+                this.spark.speed = 300
+                await this.moveAndShowEvee(400, 300, 300);
+                this.spark.stop()
+                this.spark.destroy(); // Destroy the spark particle
+                // Lower gravity
+                this.sparkwell.gravity = 0; // Adjust gravity reduction as needed
+
+                await this.waitFor(1500);
+
+
+                
+                // Move to ExperimentScene on "Spacebar" key press
+                
+                            
+                this.scene.start('ExperimentScene');
+
+                }
+
             
+            
+            countdown() {
+                this.loops = 3;
+
+                const text = this.add.text(400, 300, this.loops, { font: '26px Courier', fill: '#fff' }).setOrigin(0.5);
+
+                const emitter = this.add.particles(400, 300, 'flares', {
+                    frame: 'blue',
+                    blendMode: 'ADD',
+                    lifespan: 1000,
+                    frequency: 10,
+                    scale: { start: 0.3, end: 0.1 },
+                    stopAfter: 32
+                });
+
+                emitter.on('complete', () => {
+
+                    this.loops--;
+
+                    
+                    if (this.loops >= 0) {
+                        
+                        text.setText(this.loops);
+                        emitter.isPlaying
+                        emitter.start();
+
+                    }
+                    
+
+                });
+
+                emitter.addEmitZone({
+                    type: 'edge',
+                    source: new Phaser.Geom.Circle(0, 0, 40),
+                    quantity: 32
+                });
+            }
+
+            showOutcomeMarker(outcome) {
+                return new Promise((resolve) => {
+                    console.log("inside showOutcomeMarker ")
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY + 200;
+
+                    // Determine glow color based on the outcome
+                    const glowHexColor = outcome > 0 ? '#16a085': '#8e44ad';
+                    const txtColor = outcome > 0 ? '#a3e4d7' : '#d7bde2';
+                    //["#8e44ad", "#16a085"]
+                    if (outcome>0) {
+                        this.engain.play()
+                    } else {
+                        this.enloss.play()
+                    }
+                    // Add the outcome text
+                    const outcomeText = this.add.text(centerX, centerY-200, `${outcome} MW!`, {
+                        fontSize: '26px',
+                        fontFamily: 'Arial',
+                        color: txtColor,
+                        align: 'center',
+                    }).setOrigin(0.5);
+
+                    // Add crimson glow effect
+                    outcomeText.setStroke(glowHexColor, 6); // Crimson stroke around the text
+                    outcomeText.setShadow(2, 2, glowHexColor, 10, true, true); // Crimson glow effect
+
+                    // SHow their indicated outcome
+                    const sliderWidth = 300
+                    //const normalizedValue = (this.currentRating - (centerX - sliderWidth / 2)) / sliderWidth;
+                    console.log("X-coords outcome marker: " + centerX+outcome*1.5)
+                    this.outcmhandle = this.add.sprite(centerX+outcome*1.5, centerY-15, 'outcm-handle').setDisplaySize(30, 30).setOrigin(0.5);
+                    
+                    this.time.delayedCall(2000, () => {
+                        outcomeText.destroy();
+                        
+                         // Remove all slider components
+                        //this.circleGraphicsArray.forEach((circle) => circle.destroy());
+                        //this.circleGraphicsArray = []; // Clear the array
+                        resolve(); // Resolve the promise after the text disappears
+                    });
+                });
+            }
+
+            showOutcomeText(outcome) {
+                return new Promise((resolve) => {
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY;
+
+                    // Determine glow color based on the outcome
+                    const glowHexColor = outcome > 0 ? '#16a085': '#8e44ad';
+                    const txtColor = outcome > 0 ? '#a3e4d7' : '#d7bde2';
+                    //["#8e44ad", "#16a085"]
+
+                    if (outcome>0) {
+                        this.engain.play()
+                    } else {
+                        this.enloss.play()
+                    }
+
+                    // Add the outcome text
+                    const outcomeText = this.add.text(centerX, centerY, `${outcome} MW!`, {
+                        fontSize: '26px',
+                        fontFamily: 'Arial',
+                        color: txtColor,
+                        align: 'center',
+                    }).setOrigin(0.5);
+
+                    // Add crimson glow effect
+                    outcomeText.setStroke(glowHexColor, 6); // Crimson stroke around the text
+                    outcomeText.setShadow(2, 2, glowHexColor, 10, true, true); // Crimson glow effect
+
+                    // Remove the text after 2 seconds and resolve the promise
+                    this.time.delayedCall(2000, () => {
+                        outcomeText.destroy();
+
+                        resolve(); // Resolve the promise after the text disappears
+                    });
+                });
+            }
+
+            animateCosmicParticle(target=0) {
+                return new Promise((resolve) => {
+                    this.particlesound.play();
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY;
+
+                    // Get the target index and corresponding color
+                    const targetIndex = target; // Target index (0 or 1)
+                    const targetColor = targetIndex === 0 ? 0xe74c3c : 0x45b39d; // Example colors for two targets
+
+                    // Create the cosmic particle
+                    const cosmicParticle = this.add.particles(centerX, 0, 'flares', {
+                        frame: ['white'],
+                        color: [targetColor],
+                        lifespan: 300,
+                        speed: 10, // No initial speed; we move it via tween
+                        quantity: 1,
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'ADD',
+                    });
+
+                    cosmicParticle.start()
+                    // Tween to move the particle down to the center
+                    this.tweens.add({
+                        targets: cosmicParticle,
+                        props: {
+                            x: { value: centerX },
+                            y: { value: centerY },
+                        },
+                        duration: 350, // Adjust for the desired speed
+                        ease: 'Linear',
+                        onComplete: () => {
+                            // Stop the particle emission upon reaching the target
+                            cosmicParticle.stop();
+
+                            this.dark.color = [targetColor]
+
+                            // Destroy the particle system after the effect
+                            cosmicParticle.destroy();
+
+                            // Continue the trial
+                            resolve();
+                        },
+                    });
+                });
+            }
+
+
+            waitForSliderInput() {
+                return new Promise((resolve) => {
+                    const checkSlider = setInterval(() => {
+                        if (this.sliderSubmitted) {
+                            //this.dyn.lifespan = 300
+                            clearInterval(checkSlider);
+                            resolve();
+                        }
+                    }, 100); // Check every 100ms if slider input is complete
+                });
+            }
+
+            createSlider() {
+                const sliderWidth = 300; // Scale width in pixels
+                const sliderHeight = 10; // Scale height
+                const sliderHandleWidth = 10; // Slider handle width
+                const sliderHandleHeight = 25; // Slider handle height
+
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
+
+                this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
+                this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
+
+                // Add the slider handle
+                //this.handle = this.add.rectangle( sliderHandleWidth, sliderHandleHeight, 0x000000).setInteractive();
+                this.handle = this.add.sprite(centerX, centerY-15, 'handle').setDisplaySize(30, 30).setInteractive(); 
+                //       spr.setAlpha(this.cfg.ctx_alpha_baseline);
+                //      spr.postFX.addGlow(0xaeb6bf, 4, 0);
+                //this.handle.preFX.addGlow(0x5dade2)
+                //this.handle.setDepth(2);
+
+                this.input.setDraggable(this.handle);
+
+                // Add text to display the rating above the slider
+                this.ratingText = this.add.text(centerX-150, centerY + 30, 'Expected: 0', {
+                    fontSize: '14px',
+                    color: "#5dade2"
+                })
+
+                // Add text to display the rating above the slider
+                this.lbl1 = this.add.text(centerX-160, centerY - 25, '-100 MW', {
+                    fontSize: '14px',
+                    color: "#8e44ad"
+                });
+
+                this.lbl2 = this.add.text(centerX+105, centerY - 25, '100 MW', {
+                    fontSize: '14px',
+                    color: "#16a085"
+                });
+                // ["#8e44ad", "#16a085"]
+                // Drag functionality for the slider handle
+                this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                    if (gameObject === this.handle) {
+                        // Clamp handle position to stay within scale line
+                        gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
+
+                        // Map handle position to -100 to 100
+                        //this.currentRating
+                        const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
+                        const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
+                        this.ratingText.setText(`Estimate: ${rating} MW`);
+                        this.currentRating = rating; // Store the current rating
+
+
+                    }
+                });
+
+                // Add the submit button as an image
+                this.submitButton = this.add.sprite(centerX+50, centerY + 35, 'submit2').setInteractive();
+                let scalefac = 5
+                this.submitButton.setDisplaySize(40, 40); // Adjust size as needed
+                this.submitButton.preFX.addGlow(0x5dade2)
+                //this.submitButton.setDisplaySize((512/scalefac)-20, 302/scalefac); // Adjust size as needed
+
+                this.submitButton.on('pointerdown', () => {
+                    console.log('Submitted rating:', this.currentRating);
+                    this.sliderSubmitted = true; // Signal that the slider input is complete
+                    
+                });
+
+                // Initialize currentRating
+                this.currentRating = 0; // Default value at the center
+                this.sliderSubmitted = false;
+            }
+
+            // Helper to remove all slider components
+            removeSlider() {
+                console.log("inside remove slider")
+                this.scaleLine.destroy();
+                this.handle.destroy();
+                this.ratingText.destroy();
+                this.submitButton.destroy();
+                this.lbl1.destroy()
+                this.lbl2.destroy()
+            }
+
+
+
+            showStimuli() {
+                const centerX = 400; // Center of the scene
+                const centerY = 300; // Center of the scene
+                const radius = 150; // Radius of the hexagon
+                const stimSize = 50; // Size of each stimulus
+                this.stimGr = this.add.group(); // Create a group for stimuli
+
+                // Loop through the six positions (hexagonal layout)
+                for (let i = 0; i < 6; i++) {
+                    const angle = Phaser.Math.DegToRad(i * 60); // Convert to radians (60-degree increments)
+                    const x = centerX + radius * Math.cos(angle);
+                    const y = centerY + radius * Math.sin(angle);
+
+                    // Add each stimulus to the group
+                    const stim = this.add.sprite(x, y, `stim${i + 1}`).setDisplaySize(stimSize, stimSize);
+
+                    
+                    stim.alpha=0.2;
+
+                    this.time.delayedCall(400, () => {
+                        // Revert the speed after 50ms
+                        stim.alpha=1;
+                    });
+
+                    this.time.delayedCall(400, () => {
+                        // Revert the speed after 50ms
+                        stim.alpha=0.2;
+                    });
+                    
+                    
+                    this.stimGr.add(stim);
+                }
+
+                return; // Return the group if further manipulation is needed
+            }
+
+            pingSparkles(stimPos, sidx) {
+                return new Promise((resolve) => {
+                    
+                    this.sparksound.play();
+                    const centerX = this.cameras.main.centerX;
+                    const centerY = this.cameras.main.centerY;
+
+                    // Get the stimulus position
+                    const stim = this.stimGr.getChildren()[stimPos];
+                    stim.alpha = 1
+                    const stimX = stim.x;
+                    const stimY = stim.y;
+
+                    // Calculate the center between the stimulus and the center
+                    const center = {
+                        x: (stimX + centerX) / 2,
+                        y: (stimY + centerY) / 2,
+                    };
+
+                    // Create the sparkle particle
+                    const spark = this.add.particles(center.x, center.y, 'flares', {
+                        frame: ['yellow'],
+                        lifespan: 100,
+                        speed: 150,
+                        quantity: 1,
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'ADD',
+                    });
+
+                    // Define the line path for the sparkle
+                    const linePath = new Phaser.Geom.Line(stimX, stimY, centerX, centerY);
+                    spark.addEmitZone({
+                        type: 'edge',
+                        source: linePath,
+                        quantity: 1,
+                        total: 1,
+                    });
+
+                    // Start the sparkle and wait for it to reach the center
+                    spark.start();
+
+                    // Animate the sparkle travel
+                    const travelDuration = 800; // Adjust as needed for speed
+                    const sparkleTween = this.tweens.add({
+                        targets: spark,
+                        x: centerX,
+                        y: centerY,
+                        duration: travelDuration,
+                        onComplete: () => {
+                            // Stop sparkle emission
+                            spark.stop();
+
+                            this.darkwell.power = 1
+                            this.dark.lifespan +=  400 * sidx ** 2
+                            
+                            console.log(sidx)
+                            if (sidx == 0) {
+                                this.dark.start()
+                            }
+                            
+  
+                            if ((sidx+1) == 3) {
+                                //this.dark.lifespan = 200
+                                // this.darkwell.gravity = 60
+                            }
+
+                            // Handle the "dark" particle effect logic
+                            if (sidx === 0) {
+                                // Start "dark" particles for the first stimulus
+                                this.dark.start();
+                            }
+
+
+                            // Resolve the promise after the sparkle reaches the center
+                            resolve();
+                        },
+                    });
+                });
+            }
+
+
+            makeEvePuff(newgravity=15, newspeed=200) {
+                // Save the original properties of the particle system
+                const originalSpeed = this.spark.speed;
+                const originalGravity = this.sparkwell.gravity;
+
+                // Temporarily increase speed
+                this.spark.speed = newspeed; // Adjust speed increase as needed
+
+                // Lower gravity
+                this.sparkwell.gravity = newgravity; // Adjust gravity reduction as needed
+
+                // Use delayed calls to restore the original properties
+                this.time.delayedCall(50, () => {
+                    // Revert the speed after 50ms
+                    this.spark.speed = originalSpeed;
+                });
+
+                this.time.delayedCall(200, () => {
+                    // Revert the gravity after 200ms
+                    this.sparkwell.power = 1
+                    this.sparkwell.gravity = originalGravity;
+                });
+            }
+
+            moveAndShowEvee(x, y, dur, puff=false) {
+                return new Promise((resolve) => {
+                    if (!this.spark.wellactive) {
+                        this.sparkwell = this.spark.createGravityWell({
+                                    x: 0,
+                                    y: 0,
+                                    power: 1,
+                                    epsilon: 80,
+                                    gravity: 30,
+                                });
+                        this.spark.wellactive =true
+                        }
+                    
+                    this.es = this.sound.add('evee_swish', {volume: 0.5});
+                    this.es.play()
+
+                    this.tweens.add({
+                        targets:  this.spark,
+                        x: x,
+                        y: y,
+                        speed: 150, 
+                        lifespan: 2000,
+                        duration: dur,
+                        ease: 'Cubic.easeOut',
+                        onComplete: () => {
+                            //this.spark.x = x 
+                            //this.spark.y = y 
+
+                            
+                            resolve();
+                        } 
+                    });
+            })
+
+            }
+
             fakeEnter() {
                 return new Promise((resolve) => {
                     // Move to ExperimentScene on "Spacebar" key press
@@ -176,6 +967,9 @@
                             this.waitFor(200);
                             // Remove both buttons
                             this.intromusic = this.sound.add('intromusic', {volume: 1});
+                            if (this.intromusic.isPlaying) {
+                                this.intromusic.stop();
+                            }
                             this.intromusic.play();
                             this.waitFor(500);
                             continueButton.destroy();
@@ -199,31 +993,41 @@
                         resolve()
                 })
             }
-            showInstructionButtons(instr_string, sound, key='pointerdown') {
-                console.log(key)
+            showInstructionButtons(instr_string, sound, skipbuttons=false, key='pointerdown') {
+                const centerX = this.cameras.main.centerX;
+                const centerY = this.cameras.main.centerY;
                 return new Promise((resolve) => {
                     // Add replay button
                     
-                    const continueButton = this.add.sprite(550, 500, 'submit2').setInteractive();
+                    const continueButton = this.add.sprite(centerX+200, 500, 'submit2').setOrigin(0.5).setInteractive();
                     continueButton.setDisplaySize(40, 40); // Adjust size as needed
-                    continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
+                    //continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
 
                     if (sound>0) {
                         // /replayButton.destroy()
-                        const replayButton = this.add.sprite(200, 500, 'replay').setInteractive();
+                        const replayButton = this.add.sprite(centerX-200, 500, 'replay').setOrigin(0.5).setInteractive();
                         replayButton.setDisplaySize(40, 40); // Adjust size as needed
-                        replayButton.preFX.addGlow(0x87CEFA); // Light blue glow
+                        //replayButton.preFX.addGlow(0x87CEFA); // Light blue glow
 
                         // Play the instruction sound initially
                         const instructionSound = this.sound.add(instr_string, {volume: 0.5});
                         instructionSound.play();
 
-                        // Replay button logic
-                        replayButton.on(key, () => {
+                        if (!instructionSound.isPlaying & skipbuttons==true) {
+                            replayButton.destroy();
+                            continueButton.destroy();
                             if (instructionSound.isPlaying) {
                                 instructionSound.stop();
                             }
-                            instructionSound.play();
+                            resolve();
+                        }
+
+                        // Replay button logic
+                        replayButton.on(key, () => {
+                            if (instructionSound.isPlaying) {
+                                instructionSound.stop(); // Stop any active sound
+                            }
+                            instructionSound.play(); // Play the audio
                         });
 
                         continueButton.on(key, () => {
@@ -250,20 +1054,35 @@
                 });
             }
 
+            stopGentleMotion() {
+                if (this.sparkTween) {
+                    this.sparkTween.stop(); // Stop the current tween
+                    this.sparkTween = null; // Clear the reference
+                }
+                this.gentlemotion = 0; // Ensure the flag is set to stop motion
+            }
+
             createGentleMotion() {
                 const padding = 50; // Ensure the spark stays within bounds
                 const randomX = () => Phaser.Math.Between(padding, 800 - padding);
                 const randomY = () => Phaser.Math.Between(padding, 600 - padding);
 
                 const moveSpark = () => {
-                    this.tweens.add({
-                        targets: this.spark, // Correct target reference
-                        x: randomX(),
-                        y: randomY(),
-                        duration: Phaser.Math.Between(4000, 8000), // Smooth motion duration
-                        ease: 'Sine.easeInOut',
-                        onComplete: moveSpark // Recursively call for continuous motion
-                    });
+                    if (this.gentlemotion === 1) { // Only move the spark if gentlemotion is active
+                        const sparkTween = this.tweens.add({
+                            targets: this.spark,
+                            x: randomX(),
+                            y: randomY(),
+                            duration: Phaser.Math.Between(4000, 6000), // Smooth motion duration
+                            ease: 'Sine.easeInOut',
+                            onComplete: () => {
+                                moveSpark(); // Recursively call for continuous motion
+                            }
+                        });
+
+                        // Save the reference to the active tween for cleanup
+                        this.sparkTween = sparkTween;
+                    }
                 };
 
                 moveSpark(); // Start the initial tween
@@ -295,6 +1114,8 @@
                 this.load.image('submit2', 'assets/submit2.png');
                 this.load.image('handle', 'assets/gps.png');
                 this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
+
+                this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
 
 
 
@@ -457,6 +1278,12 @@
 
             // Start trial and process stimuli sequence
             async runTrials() {
+
+                this.lvl1music = this.sound.add('lvl1', {volume: 1});
+                if (this.lvl1music.isPlaying) {
+                    this.lvl1music.stop();
+                }
+                this.lvl1music.play();
                 
 
 
@@ -622,7 +1449,7 @@
                     //["#8e44ad", "#16a085"]
 
                     // Add the outcome text
-                    const outcomeText = this.add.text(centerX, centerY, `${outcome} points!`, {
+                    const outcomeText = this.add.text(centerX, centerY, `${outcome} MW!`, {
                         fontSize: '26px',
                         fontFamily: 'Arial',
                         color: txtColor,

@@ -1,25 +1,23 @@
 code,recorded,type,events,Text
 instr1,N,text,,"First, please carefully read the consent form and press submit if you agree."
-instr2,N,text,,"Before we get started please make sure that your audio is working and that you will be undisturbed for the next approximately 25 minutes. 
-When you are ready press Enter. "
-instr3a,N,audio,,This is actually a sound check. All you need to do to start is to pres spacebar. We are in space after all. 
-instr3b,N,audio,,The instructions said to press ENTER. 
-instr3,Y,audio,,"Oh, I am sorry. This is a space game. Please press SPACE to continue. "
 instr4,Y,audio,,"Firstly, let me introduce myself, my name is Ekaterina Valeria Esmeralda Elisabeth. Just call me Evee. 
 I will guide you through this game. Any time you miss something, just hit replay, otherwise let's get going, we have much to do! "
 instr5,Y,audio,,"As you probably know, we are currently exploring ways to make other planets habitable. While we can bring some resources for space voyages with us, others we have to manufacture directly in deep space. 
 Luckily, scientists have recently realized that we can combine our resources with high-speed particles to generate large amounts of energy. The problem is that we do not know how our ingredients interact with different space particles. 
 "
-instr6,Y,audio,,You gessed it. That's where you come in! Your task will be to learn how Earth-based mixtures interact with high-speed particles. 
-instr7,Y,audio,Show resources and nebula,You will be experimenting with these six resources. During each experiment one or more of the resources will be added to the mixture with our spark-delivery system forming a small nebula. 
-instr8,Y,audio,,The nebula serves as an incubation zone for an incoming high-speed particle. Once the nebula is hit by a particle we will be able to measure the energy that is released. And consumed.
+instr6,Y,audio,,That's where you come in! Your task will be to learn how Earth-based mixtures interact with high-speed particles. 
+instr7,Y,audio,Show resources and nebula,You will be experimenting with these six resources. During each experiment some of the resources will be added to the mixture using our spark-delivery system forming a small nebula.
+instr8,Y,audio,,The nebula serves as an incubation zone for an incoming high-speed particle. Once the nebula is hit by a particle we will be able to measure the energy that is released and consumed. Look. 
+instr8b,Y,audio,,The particle turned the nebula red. Let us measure the energy. 
+instr8c,Y,audio,,"The star-shaped resource created a nebula which reacted with a red particle. It produced 80 megawatts of energy. That is great. However, sometimes the collisions lead to a loss of energy. "
+instr8d,Y,audio,,"Now, the star shaped resource created a nebula which reacted with the blue particle. It lost us 80 megawatts of energy. That is not great. However, the point of the  irst phase is to learn which of our resources interacti with particle to gain or loose energy. We can later use this property to harness energy. "
 instr9,Y,audio,,"You see, there is a small issue. What I haven't told you yet is that we are currenty on the outskirs of the Solar system and we have very. very. limited amount of energy. If all our energy gets used up, we won't make it to our destination planet, or back to Earth. "
-instr10,Y,audio,,"So, let's focus on that not happening. Here is what you will du. In the first phase you will be observing how combinations of different resources interact with two types of high-energy particles.  "
+instr10,N,audio,,"So, let's focus on that not happening. Here is what you will du. In the first phase you will be observing how combinations of different resources interact with two types of high-energy particles. We need to learn which resources interact with the particles and which du not.  "
 instr11,Y,audio,after: sample trial starts - the outcome is within 20 points of the expectation,"During each experiment, a number of resources will be used to form the nebula. We then wait until it is hit by a particle. 
 The particles usually change the color of the nebula, so that we know which particle we caught. While the particle is in the nebula you should estimate how much energy will it produce or consume. 
 Try it now."
-instr12,Y,audio,after: three sample trials which dont go too well ,Not bad! Try a few more.
+instr12,N,audio,after: three sample trials which dont go too well ,Your prediction was pretty accurate. That is all that counts for now. Great job! Try a few more.
 instr13,Y,audio,,No worries. The whole point of these experiments is to figure this out.
 instr14,Y,audio,,"Here is the real deal. How to put this. Not only du we not have enough energy, we also can't carry all of the ingredients with us forward. We have six now but we need to get rid of some to be able to continue. You need to figure this out. "
-instr15,Y,audio,,"At this point, make as accurate predictions as possible for a given combination of ingredients and particles. Are you ready? "
+instr15,Y,audio,,"For now, try to predict accurately how much energy will combinations of our resources and space particles produce. A specific resource may produce energy for one type of particle but not the other. Are you ready? "
 instr16,Y,audio,,"Last thing, let us put some music on. As you can tell by now I am a very fun person. This is my favourite. "
