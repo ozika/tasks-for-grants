@@ -6,10 +6,13 @@ $keys = array_keys($data_array);
 echo print_r($keys);
 $subid = $data_array["subid"];
 echo $subid;
+
+$payload = $data_array["data"];
+echo $payload;
 if ($data_array != null)
 {
     $file = fopen("data/" . $subid . ".txt", "w") or die("Unable to open file!");
-    fwrite($file, $data_array["data"]);
+    fwrite($file, $payload);
     fclose($file);
 }
 else
