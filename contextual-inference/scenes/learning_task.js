@@ -292,7 +292,7 @@
             
 
             // Cosmic particle animation
-            await this.animateCosmicParticle();
+            await this.animateCosmicParticle(this.trialData[this.tridx].target - 1);
             this.txt.destroy()
 
             // show the color of the target
