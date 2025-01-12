@@ -12,7 +12,7 @@ echo $payload;
 if ($data_array != null)
 {
     $file = fopen("data/" . $subid . ".txt", "w") or die("Unable to open file!");
-    fwrite($file, $payload);
+    fwrite($file, json_encode($payload));
     fclose($file);
 }
 else
