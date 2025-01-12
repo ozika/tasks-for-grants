@@ -35,6 +35,11 @@
         this.cfg.ctx_alpha_peak = 1
         this.cfg.tar_alpha_baseline = 0.1
 
+        this.sparksound = this.sound.add('spark', {volume: 0.5});
+        this.particlesound = this.sound.add('particle', {volume: 0.5})
+        this.engain = this.sound.add('engain', {volume: 0.5})
+        this.enloss = this.sound.add('enloss', {volume: 0.5});
+
         // Background setup
         this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
 
