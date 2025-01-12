@@ -201,7 +201,7 @@
     // Start trial and process stimuli sequence
     async runTrials() {
 
-        
+        console.log(this.trialData);
         
 
 
