@@ -8,22 +8,45 @@
     preload() {
         // Preload assets
         this.load.image('space', 'assets/nightsky.png');
-       
+        this.load.image('replay', 'assets/replay.png');
+        this.load.image('submit2', 'assets/submit2.png');
+        this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
+        this.load.audio('instr3', 'assets/sound/instructions/instr3.wav');
+        this.load.audio('instr4', 'assets/sound/instructions/instr4.wav');
+        this.load.audio('instr5', 'assets/sound/instructions/instr5.wav');
+        this.load.audio('instr6', 'assets/sound/instructions/instr6.wav');
+        this.load.audio('instr7', 'assets/sound/instructions/instr7.wav');
+        this.load.audio('instr8', 'assets/sound/instructions/instr8.wav');
+        this.load.audio('instr8b', 'assets/sound/instructions/instr8b.wav');
+        this.load.audio('instr8c', 'assets/sound/instructions/instr8c.wav');
+        this.load.audio('instr8d', 'assets/sound/instructions/instr8d.wav');
+        this.load.audio('instr9', 'assets/sound/instructions/instr9.wav');
+        this.load.audio('instr10', 'assets/sound/instructions/instr10.wav');
+        this.load.audio('instr11', 'assets/sound/instructions/instr11.wav');
+        this.load.audio('instr12', 'assets/sound/instructions/instr12.wav');
+        this.load.audio('instr13', 'assets/sound/instructions/instr13.wav');
+        this.load.audio('instr14', 'assets/sound/instructions/instr14.wav');
+        this.load.audio('instr15', 'assets/sound/instructions/instr15.wav');
+        this.load.audio('instr16', 'assets/sound/instructions/instr16.wav');
+        this.load.audio('instr3a', 'assets/sound/instructions/instr3a.wav');
+        this.load.audio('instr3b', 'assets/sound/instructions/instr3b.wav');
+        this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
+        this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
+        this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
+        this.load.audio('evee_swish', 'assets/sound/effects/evee_swish.wav');
+        this.load.audio('spark', 'assets/sound/effects/spark1.wav');
+        this.load.audio('particle', 'assets/sound/effects/particle.wav');
+        this.load.audio('engain', 'assets/sound/effects/energygain2.wav');
+        this.load.audio('enloss', 'assets/sound/effects/energyloss.wav');
+
         this.load.image('stim1', 'assets/potion.png');
         this.load.image('stim2', 'assets/starfish.png');
         this.load.image('stim3', 'assets/diamond.png');
         this.load.image('stim4', 'assets/crystals.png');
         this.load.image('stim5', 'assets/stone.png');
         this.load.image('stim6', 'assets/letax.png');
-
-        this.load.audio('spark', 'assets/sound/effects/spark1.wav');
-        
-        //this.load.image('t1', 'assets/target1.png');
-        //this.load.image('t2', 'assets/target2.png');
-        this.load.image('submit', 'assets/submit.png');
-        this.load.image('submit2', 'assets/submit2.png');
         this.load.image('handle', 'assets/gps.png');
-        this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
+        this.load.image('outcm-handle', 'assets/gps2.png');
 
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
 
