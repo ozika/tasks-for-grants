@@ -177,7 +177,7 @@
 
         // Fetch trial data
         //fetch('schedules/sch1.csv')
-        fetch('http://141.5.101.169/tasks-for-grants/contextual-inference/schedules/sch1.csv', {mode: 'no-cors'}) 
+        fetch('http://141.5.101.169/tasks-for-grants/contextual-inference/schedules/sch1.csv') 
             .then(response => response.text())
             .then(text => {
                 this.trialData = Papa.parse(text, { header: true }).data;
