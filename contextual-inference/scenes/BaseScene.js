@@ -93,7 +93,7 @@ class BaseScene extends Phaser.Scene {
         })
 
     }
-    
+
     showStimuli() {
         const centerX = 400; // Center of the scene
         const centerY = 300; // Center of the scene
@@ -314,6 +314,7 @@ class BaseScene extends Phaser.Scene {
 
         this.submitButton.on('pointerdown', () => {
             console.log('Submitted rating:', this.currentRating);
+            this.removeSlider();
             this.sliderSubmitted = true; // Signal that the slider input is complete
             
         });
