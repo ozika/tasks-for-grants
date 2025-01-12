@@ -177,39 +177,8 @@
 
         // Fetch trial data
         //fetch('schedules/sch1.csv')
-        fetch('http://141.5.101.169/tasks-for-grants/contextual-inference/schedules/sch1.csv')
-        .then(response => {
-            // Check if the response is successful (status code 200–299)
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
-            }
-            return response.text();
-        })
-        .then(text => {
-            try {
-                // Parse the CSV data using PapaParse
-                this.trialData = Papa.parse(text, { header: true }).data;
 
-                // Check if parsing resulted in any data
-                if (!this.trialData || this.trialData.length === 0) {
-                    throw new Error('Parsed CSV data is empty.');
-                }
-
-                console.log('CSV data successfully loaded and parsed:', this.trialData);
-
-                // Call the function to run trials
-                // this.runTrials(); // Uncomment if applicable
-            } catch (parseError) {
-                console.error('Error parsing CSV data:', parseError);
-            }
-        })
-        .catch(error => {
-            // Handle fetch and other errors
-            console.error('Error fetching CSV file:', error);
-            if (error.name === 'TypeError') {
-                console.error('This might be due to a network issue or an incorrect URL.');
-            }
-        });
+        
         
         
         // SHARP START
@@ -219,16 +188,24 @@
         }
         this.lvl1music.play();
 
-        this,this.waitFor(2000)
+        this.waitFor(2000);
         
         this.runTrials();
 
     }
 
+    
+
     // Start trial and process stimuli sequence
     async runTrials() {
 
-        console.log(this.trialData);
+        await this.fetchData()
+
+
+        if (!this.trialData || this.trialData.length === 0) {
+            console.error('No trial data available!');
+            return;
+        }
         
 
 
