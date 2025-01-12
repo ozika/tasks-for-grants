@@ -55,6 +55,7 @@
     }
 
     create() {
+        this.inject_data = true
         this.cfg =[] 
         this.cfg.ctx_alpha_baseline = 0.1
         this.cfg.ctx_alpha_peak = 1

@@ -4,6 +4,9 @@ class IntroScene extends BaseScene {
     }
 
     create() {
+
+        this.inject_data = false
+
         // Set up background
         this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
 

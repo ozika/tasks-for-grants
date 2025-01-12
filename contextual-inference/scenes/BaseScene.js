@@ -2,6 +2,7 @@ class BaseScene extends Phaser.Scene {
     constructor(key) {
         super(key);
     }
+    
 
     preload() {
         // Preload assets
@@ -314,6 +315,11 @@ class BaseScene extends Phaser.Scene {
 
         this.submitButton.on('pointerdown', () => {
             console.log('Submitted rating:', this.currentRating);
+            //save rating 
+            if (this.inject_data = true) {
+                console.log("Injected rating data")
+                this.trialData[this.tridx].rating = this.currentRating;
+            }
             this.removeSlider();
             this.sliderSubmitted = true; // Signal that the slider input is complete
             
@@ -577,7 +583,7 @@ class BaseScene extends Phaser.Scene {
 
 
     sendTrialData() {
-        const outdata = {partial: false, subid: "subtest", data: this.trialData} 
+        const outdata = {partial: false, subid: "newstest", data: this.trialData} 
         this.postData(JSON.stringify(outdata));
     
     }

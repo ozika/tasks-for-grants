@@ -11,7 +11,7 @@ $payload = $data_array["data"];
 echo $payload;
 if ($data_array != null)
 {
-    $file = fopen("data/" . $subid . ".txt", "w") or die("Unable to open file!");
+    $file = fopen("data/" . $subid . ".json", "w") or die("Unable to open file!");
     fwrite($file, json_encode($payload));
     fclose($file);
 }
