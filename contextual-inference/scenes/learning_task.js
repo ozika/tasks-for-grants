@@ -177,7 +177,7 @@
 
         // Fetch trial data
         //fetch('schedules/sch1.csv')
-        fetch('https://github.com/ozika/tasks-for-grants/blob/main/contextual-inference/schedules/sch1.csv') 
+        fetch('schedules/sch1.csv', {mode: 'no-cors'}) 
             .then(response => response.text())
             .then(text => {
                 this.trialData = Papa.parse(text, { header: true }).data;
