@@ -15,6 +15,8 @@
         this.load.image('stim4', 'assets/crystals.png');
         this.load.image('stim5', 'assets/stone.png');
         this.load.image('stim6', 'assets/letax.png');
+
+        this.load.audio('spark', 'assets/sound/effects/spark1.wav');
         
         //this.load.image('t1', 'assets/target1.png');
         //this.load.image('t2', 'assets/target2.png');
