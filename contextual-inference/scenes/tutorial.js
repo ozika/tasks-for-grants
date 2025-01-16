@@ -5,7 +5,7 @@ class IntroScene extends BaseScene {
 
     create() {
 
-        this.inject_data = false
+        
 
         // Set up background
         this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
@@ -111,6 +111,15 @@ class IntroScene extends BaseScene {
     }
 
     async showIntro() {
+
+        
+        
+        if (this.scene.isActive('ExperimentScene')) {
+            console.log('ExperimentScene is currently active.');
+        } else {
+            console.log('ExperimentScene is currently NOT active.');
+        }
+        
         await this.veryStart()
 
         // Start introduction
@@ -226,20 +235,21 @@ class IntroScene extends BaseScene {
         //await this.makeEvePuff(2,200)
 
         
-        
+        await this.waitFor(1000); 
 
         await this.showOutcomeText(-80)
+        this.target_particles[1].dyn.stop()
 
         await this.showInstructionButtons('instr8d', 1);
 
-        this.target_particles[1].dyn.stop()
+        
 
 
         await this.makeEvePuff()
         await this.moveAndShowEvee(100, 200, 1600);
-        await this.showInstructionButtons('instr9', 1);
+        //await this.showInstructionButtons('instr9', 1);
 
-        await this.makeEvePuff()
+        //await this.makeEvePuff()
         await this.showInstructionButtons('instr10', 1);
 
         await this.makeEvePuff(2, 300)
@@ -275,9 +285,9 @@ class IntroScene extends BaseScene {
         this.dark.stop()
         this.target_particles[1].dyn.start()
 
-        this.createSlider() 
+        await this.createSlider() 
 
-        await this.waitForSliderInput();                  
+        //await this.waitForSliderInput();                  
         this.target_particles[1].dyn.stop()
         
         // ISI 2
@@ -325,9 +335,9 @@ class IntroScene extends BaseScene {
             this.dark.stop()
             this.target_particles[tt[i]].dyn.start()
 
-            this.createSlider() 
+            await this.createSlider() 
 
-            await this.waitForSliderInput();                  
+            //await this.waitForSliderInput();                  
             this.target_particles[tt[i]].dyn.stop()
             
             // ISI 2

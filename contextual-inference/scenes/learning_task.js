@@ -30,8 +30,20 @@
         this.load.audio('instr16', 'assets/sound/instructions/instr16.wav');
         this.load.audio('instr3a', 'assets/sound/instructions/instr3a.wav');
         this.load.audio('instr3b', 'assets/sound/instructions/instr3b.wav');
+        
+        this.load.audio('instr_1_1', 'assets/sound/instructions/instr_1_1.wav');
+        this.load.audio('instr_1_2a', 'assets/sound/instructions/instr_1_2a.wav');
+        this.load.audio('instr_1_2b', 'assets/sound/instructions/instr_1_2b.wav');
+        this.load.audio('instr_1_2bb', 'assets/sound/instructions/instr_1_2bb.wav');
+        this.load.audio('instr_1_2b2', 'assets/sound/instructions/instr_1_2b2.wav');
+        this.load.audio('instr_1_2b3', 'assets/sound/instructions/instr_1_2b3.wav');
+        this.load.audio('instr_1_3', 'assets/sound/instructions/instr_1_3.wav');
+
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
+        this.load.audio('lvl2', 'assets/sound/soundtrack/game_music6.mp3');
+        this.load.audio('lvl3', 'assets/sound/soundtrack/game_music7.mp3');
+
         this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
         this.load.audio('evee_swish', 'assets/sound/effects/evee_swish.wav');
         this.load.audio('spark', 'assets/sound/effects/spark1.wav');
@@ -55,11 +67,13 @@
     }
 
     create() {
-        this.inject_data = true
+        
         this.cfg =[] 
         this.cfg.ctx_alpha_baseline = 0.1
         this.cfg.ctx_alpha_peak = 1
         this.cfg.tar_alpha_baseline = 0.1
+
+        this.subID = "testID"
 
         this.sparksound = this.sound.add('spark', {volume: 0.5});
         this.particlesound = this.sound.add('particle', {volume: 0.5})
@@ -177,17 +191,6 @@
             this.stimGr.add(spr);
         }
 
-        /* Create group from contextual cues
-        this.tarGr = this.add.group(); // Create a group
-
-        // Add 2 targets
-        for (let i = 0; i < 2; i++) {
-            let tim = this.add.image(cX, cY, 't'+(i+1)).setDisplaySize(stim_dim_x*1.5, stim_dim_y*1.5);
-            tim.setAlpha(this.cfg.tar_alpha_baseline);
-            this.tarGr.add(tim); 
-        }
-        //targets["t2"].setAlpha(0.8)
-        */
         // create gradient texture
         const sliderWidth = 300;
         const sliderHeight = 10;
@@ -212,129 +215,260 @@
         
         
         
+        
+
+        
+
+        
+
+        this.runTask();
+
+
+
+    }
+
+    async runTask() {
+
         // SHARP START
-        this.lvl1music = this.sound.add('lvl1', {volume: 1});
+        this.lvl1music = this.sound.add('lvl1', {volume: 1, loop: true});
         if (this.lvl1music.isPlaying) {
             this.lvl1music.stop();
         }
         this.lvl1music.play();
 
-        this.waitFor(2000);
+        // INITIAL WAIT
+        await this.waitFor(2000);
+
+        let cond = [];
+        //cond[0] = { name: "train1", rel: "1" }; // make sure this is obvious like +20 -25
+        cond[0] = { name: "test", rel: "3" };
+        cond[1] = { name: "train2", rel: "1" };
+        cond[2] = { name: "main", rel: "3" };
+
         
-        this.runTrials();
+        // RUN TRAINING
+        await this.runTrials(cond[0]);
+        this.tweens.add({
+            targets: this.lvl1music,
+            volume: 0.02,
+            duration: 4000 // Original duration
+        });
+        await this.waitFor(3500)
+                
+        console.log("training 1 completed")
+        for (let i = 0; i < 6; i++) { 
+            this.stimGr.getChildren()[i].alpha=0.5;
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(100); 
+        }
+        await this.showInstructionButtons('instr_1_1', 1, true);
+
+        // Collect a click
+        let clickedid = await this.getStimClick() 
+
+        this.tweens.add({
+            targets: this.lvl1music,
+            volume: 0,
+            duration: 2000 // Original duration
+        });
+        this.sound.stopAll();
+
+        // Check if they selected the correct stimulus
+        if (clickedid = this.trialData[0].correct_stim) {
+            await this.showInstructionButtons('instr_1_2a', 1, true);
+
+        } else {
+            while (clickedid !=this.trialData[0].correct_stim) {
+                await this.showInstructionButtons('instr_1_2b', 1, true);
+
+                this.stimGr.getChildren()[this.trialData[0].correct_stim].alpha = 1
+
+                await this.showInstructionButtons('instr_1_2bb', 1, true);
+                await this.showInstructionButtons('instr_1_2b2', 1, true);
+                for (let i = 0; i < 6; i++) { 
+                    this.stimGr.getChildren()[i].alpha=0.1;
+                    //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+                    await this.waitFor(100); 
+                }
+                this.lvl1music.play();
+                this.waitFor(3000)
+                await this.runTrials(cond[1]);
+
+                this.tweens.add({
+                    targets: this.lvl1music,
+                    volume: 0.02,
+                    duration: 4000 // Original duration
+                });
+                await this.waitFor(3500)
+                        
+                console.log("training 1 completed")
+                for (let i = 0; i < 6; i++) { 
+                    this.stimGr.getChildren()[i].alpha=0.5;
+                    //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+                    await this.waitFor(100); 
+                }
+                await this.showInstructionButtons('instr_1_1', 1, true);
+                // Collect a click
+                let clickedid = await this.getStimClick() 
+            }
+
+        }
+        
+        await this.waitFor(3000)
+        await this.showInstructionButtons('instr_1_2b3', 1, true);
+        await this.showInstructionButtons('instr_1_3', 1, true);
+
+
+        // SHARP START
+        this.lvl2music = this.sound.add('lvl2', {volume: 1, loop: true});
+        if (this.lvl2music.isPlaying) {
+            this.lvl2music.stop();
+        }
+        this.lvl2music.play();
+
+        await this.waitFor(5000)
+
+        // RUN MAIN TASK
+        await this.runTrials(cond[2]);
+
+        this.tweens.add({
+            targets: this.lvl1music,
+            volume: 0.02,
+            duration: 4000 // Original duration
+        });
+        await this.waitFor(3500)
+
+        
+        
 
     }
 
     
 
     // Start trial and process stimuli sequence
-    async runTrials() {
-
-        await this.fetchData()
-
-
-        if (!this.trialData || this.trialData.length === 0) {
-            console.error('No trial data available!');
-            return;
-        }
-        
+    async runTrials(conf) {
+            var flag = "_test"
+            var cond_name = "r"+conf.rel +"_"+conf.name+flag
+            this.cond_name = cond_name
+            await this.fetchData("sch_"+cond_name+".csv")
 
 
-        this.tridx = 0; 
-        this.notrials = this.trialData.length;
-        this.timing = []
-        this.timing.ctx_warupdown = 750;
-        this.timing.ctx_cue_dur = 250;
-        this.timing.ctx_onsets = [500, 1500, 2500]; // Proper array initialization
-        this.timing.ctxs_offset = [3500]
-        this.timing.ctx_all = [...this.timing.ctx_onsets, ...this.timing.ctxs_offset]
-        this.timing.target_dur = 1000
-        this.timing.iti = 2000
-        this.timing.isi1 = 1000
-        this.timing.isi2 = 1000
-
-        for (let i = 0; i < this.notrials-1; i++) {
-
-            // Reset gravity well and particle properties for each trial
-            this.darkwell.gravity = 30
-            this.darkwell.power = 1 
-            this.dark.lifespan = 500
-            this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 30; // Reset to default or base gravity
-
-            //this.dyn.setPosition(cX, cY); // Reset particle emitter position
-            
-
-            console.log(`Trial ${this.tridx}`); 
-            console.log(`Gravity ${  this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity}`);
-            console.log(`Speed ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.speed}`);
-            console.log(`lifespan ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.lifespan}`);
-            //this.dyn.speed = 300
-            
-
-            // Get sequence for this trial
-            this.trialData[this.tridx].seq = [];
-            for (let j = 1; j <= 3; j++) {
-                let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10) - 1; // -1 because the positions start at 1, not 0
-                this.trialData[this.tridx].seq.push(stimPosition);
+            if (!this.trialData || this.trialData.length === 0) {
+                console.error('No trial data available!');
+                return;
+            } else {
+                console.log("sch_"+cond_name+".csv" + " succesfully loaded!")
             }
-            console.log("   Sequence: " + this.trialData[this.tridx].seq);
-
-            // Flash stimuli in sequence
-            await this.showCtxtCues(this.trialData[this.tridx].seq);
-            
-            this.dark.lifespan = 200
-
-            // Show text
-            this.showText("Particle incoming!", 400, 100, "18px")
-
-            // ISI 1
-            await this.waitFor(this.timing.isi1)//+ Math.random() * 5000);
-
             
 
-            // Cosmic particle animation
-            await this.animateCosmicParticle(this.trialData[this.tridx].target - 1);
-            this.txt.destroy()
 
-            // show the color of the target
-            this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
-            this.dark.stop()
-            // Show target
-            //await this.showTarget(this.trialData[this.tridx].target);
-            //this.dyn.speed = 300
-            //this.dynwell.gravity = 60
+            this.tridx = 0; 
+            this.notrials = this.trialData.length;
+            this.timing = []
+            this.timing.ctx_warupdown = 750;
+            this.timing.ctx_cue_dur = 250;
+            this.timing.ctx_onsets = [500, 1500, 2500]; // Proper array initialization
+            this.timing.ctxs_offset = [3500]
+            this.timing.ctx_all = [...this.timing.ctx_onsets, ...this.timing.ctxs_offset]
+            this.timing.target_dur = 1000
+            this.timing.iti = 2000
+            this.timing.isi1 = 1000
+            this.timing.isi2 = 1000
 
-            await this.waitFor(this.timing.target_dur);
+            for (let i = 0; i < this.notrials-1; i++) {
 
-            // Display slider and wait for rating
-            this.createSlider();
-            
-            await this.waitForSliderInput();
+                // Reset gravity well and particle properties for each trial
+                this.darkwell.gravity = 30
+                this.darkwell.power = 1 
+                this.dark.lifespan = 500
+                this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 30; // Reset to default or base gravity
 
-            
-            this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
-            
-            // ISI 2
-            await this.waitFor(this.timing.isi2);
-            this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
+                //this.dyn.setPosition(cX, cY); // Reset particle emitter position
+                
 
-            // Show outcome text
-            await this.showOutcomeText(this.trialData[this.tridx].outcome);
+                console.log(`Trial ${this.tridx}`); 
+                console.log(`Gravity ${  this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity}`);
+                console.log(`Speed ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.speed}`);
+                console.log(`lifespan ${  this.target_particles[this.trialData[this.tridx].target-1].dyn.lifespan}`);
+                //this.dyn.speed = 300
+                
 
-            // Change alpha back to baseline
-            this.stimGr.children.each((child) => {
-                child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-            });
-            
+                // Get sequence for this trial
+                this.trialData[this.tridx].seq = [];
+                var no_shown = this.trialData[0].no_shown 
+                console.log("no stimuli shown:" + no_shown)
+                for (let j = 1; j <= no_shown; j++) {
+                    let stimPosition = parseInt(this.trialData[this.tridx][`stim_positions_stim${j}`], 10) - 1; // -1 because the positions start at 1, not 0
+                    this.trialData[this.tridx].seq.push(stimPosition);
+                }
+                console.log("   Sequence: " + this.trialData[this.tridx].seq);
 
-            await this.waitFor(this.timing.iti);
-            this.tridx += 1;
+                // Flash stimuli in sequence
+                await this.showCtxtCues(this.trialData[this.tridx].seq);
+                
+                this.dark.lifespan = 200
 
-            if (this.tridx >= this.notrials - 1) {
-                this.sendTrialData(); // Save the data after the last trial
+                // Show text
+                //var txt =[]
+                //txt = this.showText("Particle incoming!", 400, 100, "18px")
+                let txtobj = this.add.text(400, 100, "Particle incoming!", {
+                    fontSize: "18px",
+                    fontFamily: 'Arial',
+                    color: "#87D8FC",
+                    align: 'center',
+                }).setOrigin(0.5);
+                
+
+                // ISI 1
+                await this.waitFor(this.timing.isi1)//+ Math.random() * 5000);
+
+                
+
+                // Cosmic particle animation
+                await this.animateCosmicParticle(this.trialData[this.tridx].target - 1);
+                // Safely destroy the text
+                txtobj.destroy();
+
+                // show the color of the target
+                this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
+                this.dark.stop()
+                // Show target
+                //await this.showTarget(this.trialData[this.tridx].target);
+                //this.dyn.speed = 300
+                //this.dynwell.gravity = 60
+
+                await this.waitFor(this.timing.target_dur);
+
+                // Display slider and wait for rating
+                await this.createSlider();
+                this.removeSlider()
+                //await this.waitForSliderInput();
+
+                
+                this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
+                
+                // ISI 2
+                await this.waitFor(this.timing.isi2);
+                this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
+
+                // Show outcome text
+                await this.showOutcomeText(this.trialData[this.tridx].outcome);
+
+                // Change alpha back to baseline
+                this.stimGr.children.each((child) => {
+                    child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                });
+                
+
+                await this.waitFor(this.timing.iti);
+                this.tridx += 1;
+
+                if (this.tridx >= this.notrials - 1) {
+                    this.sendTrialData(); // Save the data after the last trial
+                }
             }
-        }
-    }
+  
+}
     
 
     /*    
@@ -451,6 +585,7 @@
             await this.waitFor(this.timing.ctx_cue_dur);
         }
     }
+    
 
     showTarget(tid) {
         return new Promise((resolve) => { 
@@ -581,6 +716,7 @@ removeSlider() {
 */
 extendLineAndDrawCircle(stimPos, sidx) {
     return new Promise((resolve) => {
+        this.sparksound.play();
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
 

@@ -22,6 +22,15 @@
             display: block;
             margin: 0 auto;
         }
+
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            background-color: #000; /* Optional: Set background color */
+        }
     </style>
 </head>
 <body>
@@ -58,6 +67,11 @@
             type: Phaser.AUTO,
             width: 800,
             height: 600,
+            parent: 'game-container', // Phaser will append the canvas here
+            scale: {
+                mode: Phaser.Scale.FIT, // Automatically resize to fit screen
+                autoCenter: Phaser.Scale.CENTER_BOTH // Center the canvas
+            },
             backgroundColor: '#2c3e50',
             //scene: [IntroScene, ExperimentScene]
             scene: [ExperimentScene]

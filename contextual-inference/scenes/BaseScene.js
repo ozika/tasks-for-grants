@@ -53,9 +53,9 @@ class BaseScene extends Phaser.Scene {
     }
 
     
-    fetchData() {
+    fetchData(schedule_name) {
         return new Promise((resolve) => {
-            fetch('http://141.5.101.169/tasks-for-grants/contextual-inference/schedules/sch1.csv')
+            fetch('schedules/'+schedule_name)
             .then(response => {
                 // Check if the response is successful (status code 200–299)
                 if (!response.ok) {
@@ -259,75 +259,81 @@ class BaseScene extends Phaser.Scene {
     }
 
     createSlider() {
-        const sliderWidth = 300; // Scale width in pixels
-        const sliderHeight = 10; // Scale height
+        return new Promise((resolve) => {
 
-        const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
+            const sliderWidth = 300; // Scale width in pixels
+            const sliderHeight = 10; // Scale height
 
-        this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
-        this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
+            const centerX = this.cameras.main.centerX;
+            const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
 
-        // Add the slider handle
-        this.handle = this.add.sprite(centerX, centerY-15, 'handle').setDisplaySize(30, 30).setInteractive(); 
+            this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
+            this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
 
-        this.input.setDraggable(this.handle);
+            // Add the slider handle
+            this.handle = this.add.sprite(centerX, centerY-15, 'handle').setDisplaySize(30, 30).setInteractive(); 
 
-        // Add text to display the rating above the slider
-        this.ratingText = this.add.text(centerX-150, centerY + 30, 'Expected: 0', {
-            fontSize: '14px',
-            color: "#5dade2"
+            this.input.setDraggable(this.handle);
+
+            // Add text to display the rating above the slider
+            this.ratingText = this.add.text(centerX-150, centerY + 30, 'Expected: 0', {
+                fontSize: '14px',
+                color: "#5dade2"
+            })
+
+            // Add text to display the rating above the slider
+            this.lbl1 = this.add.text(centerX-160, centerY - 25, '-100 MW', {
+                fontSize: '14px',
+                color: "#8e44ad"
+            });
+
+            this.lbl2 = this.add.text(centerX+105, centerY - 25, '100 MW', {
+                fontSize: '14px',
+                color: "#16a085"
+            });
+            // ["#8e44ad", "#16a085"]
+            // Drag functionality for the slider handle
+            this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                if (gameObject === this.handle) {
+                    // Clamp handle position to stay within scale line
+                    gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
+
+                    // Map handle position to -100 to 100
+                    //this.currentRating
+                    const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
+                    const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
+                    this.ratingText.setText(`Estimate: ${rating} MW`);
+                    this.currentRating = rating; // Store the current rating
+
+
+                }
+            });
+
+            // Add the submit button as an image
+            this.submitButton = this.add.sprite(centerX+50, centerY + 35, 'submit2').setInteractive();
+            this.submitButton.setDisplaySize(40, 40); // Adjust size as needed
+            this.submitButton.preFX.addGlow(0x5dade2)
+
+
+            this.submitButton.on('pointerdown', () => {
+                console.log('Submitted rating:', this.currentRating);
+                //save rating 
+                console.log("Is intro scene:" + (this.scene.isActive('IntroScene') == true))
+                console.log("Is experiment scene:" + (this.scene.isActive('ExperimentScene') == true))
+                if (!this.scene.isActive('IntroScene') == true) {
+                    console.log("Injected rating data")
+                    this.trialData[this.tridx].rating = this.currentRating;
+                }
+                
+                this.sliderSubmitted = true; // Signal that the slider input is complete
+                resolve()
+                
+            });
+
+            // Initialize currentRating
+            this.currentRating = 0; // Default value at the center
+            this.sliderSubmitted = false;
         })
-
-        // Add text to display the rating above the slider
-        this.lbl1 = this.add.text(centerX-160, centerY - 25, '-100 MW', {
-            fontSize: '14px',
-            color: "#8e44ad"
-        });
-
-        this.lbl2 = this.add.text(centerX+105, centerY - 25, '100 MW', {
-            fontSize: '14px',
-            color: "#16a085"
-        });
-        // ["#8e44ad", "#16a085"]
-        // Drag functionality for the slider handle
-        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-            if (gameObject === this.handle) {
-                // Clamp handle position to stay within scale line
-                gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
-
-                // Map handle position to -100 to 100
-                //this.currentRating
-                const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
-                const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
-                this.ratingText.setText(`Estimate: ${rating} MW`);
-                this.currentRating = rating; // Store the current rating
-
-
-            }
-        });
-
-        // Add the submit button as an image
-        this.submitButton = this.add.sprite(centerX+50, centerY + 35, 'submit2').setInteractive();
-        this.submitButton.setDisplaySize(40, 40); // Adjust size as needed
-        this.submitButton.preFX.addGlow(0x5dade2)
-
-
-        this.submitButton.on('pointerdown', () => {
-            console.log('Submitted rating:', this.currentRating);
-            //save rating 
-            if (this.inject_data = true) {
-                console.log("Injected rating data")
-                this.trialData[this.tridx].rating = this.currentRating;
-            }
-            this.removeSlider();
-            this.sliderSubmitted = true; // Signal that the slider input is complete
-            
-        });
-
-        // Initialize currentRating
-        this.currentRating = 0; // Default value at the center
-        this.sliderSubmitted = false;
     }
 
     waitForSliderInput() {
@@ -352,6 +358,59 @@ class BaseScene extends Phaser.Scene {
         this.submitButton.destroy();
         this.lbl1.destroy()
         this.lbl2.destroy()
+    }
+
+    async getStimClick() {
+        console.log("inside getStimClick")
+        // Enable interactivity for all sprites
+        this.stimGr.children.each((sprite) => {
+            sprite.setInteractive();
+        });
+
+        // Wait for a sprite to be clicked
+        await this.waitForStimClick();
+
+        console.log(`Player clicked sprite with ID: ${this.stimSelected}`);
+
+        return this.stimSelected
+
+        // Disable interactivity for all sprites
+        //this.disableStimInteractivity();
+    } 
+
+
+    async disableStimInteractivity() {
+        this.stimGr.children.each((sprite) => {
+            sprite.disableInteractive(); // Disable interactivity
+            sprite.off('pointerdown'); // Remove the pointerdown listener
+        });
+    
+        console.log("Sprites are no longer interactive");
+    } 
+
+    async waitForStimClick() {
+        return new Promise((resolve) => {
+            console.log("inside waitForStimClick")
+            this.stimGr.getChildren().forEach((sprite, index) => {
+                sprite.on('pointerdown', () => {
+                    this.stimSelected = index; // Save the index of the selected sprite
+                    sprite.setAlpha(1); // Highlight the clicked sprite
+                    console.log(`Sprite clicked at index: ${index}`);
+    
+                    // Disable interactivity for all sprites
+                    this.stimGr.getChildren().forEach((s) => s.disableInteractive());
+
+                    this.time.delayedCall(300, () => {
+                        sprite.setAlpha(0.1); // Highlight the clicked sprite
+                        resolve(sprite); // Resolve the promise with the clicked sprite
+                    });
+    
+                    
+                });
+            });
+
+
+        });
     }
 
     showOutcomeMarker(outcome) {
@@ -432,12 +491,15 @@ class BaseScene extends Phaser.Scene {
     }
 
     showText(text, x, y, size) {
-    this.txt = this.add.text(x, y, text, {
-                fontSize: size,
-                fontFamily: 'Arial',
-                color: "#87D8FC",
-                align: 'center',
-            }).setOrigin(0.5);
+        return new Promise((resolve) => {
+             let txtobj = this.add.text(x, y, text, {
+                    fontSize: size,
+                    fontFamily: 'Arial',
+                    color: "#87D8FC",
+                    align: 'center',
+                }).setOrigin(0.5);
+                resolve(txtobj)
+        });
     }
 
     // GENERAL TIMING FUNCS
@@ -583,7 +645,7 @@ class BaseScene extends Phaser.Scene {
 
 
     sendTrialData() {
-        const outdata = {partial: false, subid: "newstest", data: this.trialData} 
+        const outdata = {partial: false, subid: this.subID+"_"+this.cond_name, data: this.trialData} 
         this.postData(JSON.stringify(outdata));
     
     }
