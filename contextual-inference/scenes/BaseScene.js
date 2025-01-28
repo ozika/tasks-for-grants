@@ -400,8 +400,8 @@ class BaseScene extends Phaser.Scene {
                     // Disable interactivity for all sprites
                     this.stimGr.getChildren().forEach((s) => s.disableInteractive());
 
-                    this.time.delayedCall(300, () => {
-                        sprite.setAlpha(0.1); // Highlight the clicked sprite
+                    this.time.delayedCall(150, () => {
+                        sprite.setAlpha(1); // Highlight the clicked sprite
                         resolve(sprite); // Resolve the promise with the clicked sprite
                     });
     
@@ -500,6 +500,83 @@ class BaseScene extends Phaser.Scene {
                 }).setOrigin(0.5);
                 resolve(txtobj)
         });
+    }
+
+    showSparkleEffect(duration) {
+        // Create a group for blue flares
+        this.stars = this.add.group({
+            key: 'flares',
+            frame: 'blue',
+            repeat: 100, // Total 100 flares
+            setXY: { x: 0, y: 0 }, // Start with all flares at (0, 0)
+            visible: false // Initially invisible
+        });
+
+        this.stars.children.iterate((flare) => {
+            flare.setScale(Phaser.Math.FloatBetween(0.1, 0.2)); // Random size (0.1 or 0.2)
+            flare.setAlpha(0); // Start fully transparent
+        });
+
+        // Create a group for red flares
+        this.stars2 = this.add.group({
+            key: 'flares',
+            frame: 'red',
+            repeat: 100, // Total 100 flares
+            setXY: { x: 0, y: 0 }, // Start with all flares at (0, 0)
+            visible: false // Initially invisible
+        });
+
+        this.stars2.children.iterate((flare) => {
+            flare.setScale(Phaser.Math.FloatBetween(0.05, 0.15)); // Random size (0.05 or 0.15)
+            flare.setAlpha(0); // Start fully transparent
+        });
+
+        // Start the flare animation loops
+        const blueEvent = this.time.addEvent({
+            delay: 100, // Schedule a new blue flare to appear every 100ms
+            callback: () => this.showRandomFlare(this.stars),
+            callbackScope: this,
+            loop: true
+        });
+
+        const redEvent = this.time.addEvent({
+            delay: 100, // Schedule a new red flare to appear every 100ms
+            callback: () => this.showRandomFlare(this.stars2),
+            callbackScope: this,
+            loop: true
+        });
+
+        // Stop the sparkle effect after the specified duration
+        this.time.delayedCall(duration, () => {
+            blueEvent.remove();
+            redEvent.remove();
+        });
+    }
+
+    showRandomFlare(group) {
+        // Pick a random flare that isn't currently visible
+        const availableFlares = group.getChildren().filter(flare => !flare.visible);
+
+        if (availableFlares.length > 0) {
+            const flare = Phaser.Utils.Array.GetRandom(availableFlares);
+            const x = Phaser.Math.Between(50, 750); // Random x position within canvas
+            const y = Phaser.Math.Between(50, 550); // Random y position within canvas
+
+            flare.setPosition(x, y);
+            flare.setVisible(true);
+
+            // Animate flare appearance and disappearance
+            this.tweens.add({
+                targets: flare,
+                alpha: { from: 0, to: 1 }, // Gradually appear
+                duration: 1000, // 1 second to fully appear
+                yoyo: true, // Reverse to fade out
+                hold: 1000, // Stay fully visible for 1 second
+                onComplete: () => {
+                    flare.setVisible(false); // Hide the flare once the tween completes
+                }
+            });
+        }
     }
 
     // GENERAL TIMING FUNCS

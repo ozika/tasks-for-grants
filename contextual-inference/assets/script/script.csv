@@ -6,7 +6,7 @@ instr5,Y,audio,,"As you probably know, we are currently exploring ways to make o
 Luckily, scientists have recently realized that we can combine our resources with high-speed particles to generate large amounts of energy. The problem is that we do not know how our ingredients interact with different space particles. 
 "
 instr6,Y,audio,,That's where you come in! Your task will be to learn how Earth-based mixtures interact with high-speed particles. 
-instr7,Y,audio,Show resources and nebula,You will be experimenting with these six resources. During each experiment some of the resources will be added to the mixture using our spark-delivery system forming a small nebula.
+instr7,Y,audio,Show resources and nebula,You will be experimenting with six resources. During each experiment some of the resources will be added to the mixture using our spark-delivery system forming a small nebula.
 instr8,Y,audio,,The nebula serves as an incubation zone for an incoming high-speed particle. Once the nebula is hit by a particle we will be able to measure the energy that is released and consumed. Look. 
 instr8b,Y,audio,,The particle turned the nebula red. Let us measure the energy. 
 instr8c,Y,audio,,"The star-shaped resource created a nebula which reacted with a red particle. It produced 80 megawatts of energy. That is great. However, sometimes the collisions lead to a loss of energy. "
@@ -23,9 +23,10 @@ instr15,Y,audio,,"First, I have a little simulated environment for you. To pract
 instr15b,Y,audio,,"Okay, let us get started. "
 instr16,Y,audio,,"Last thing, let us put some music on. As you can tell by now I am a very fun person. This is my favourite. "
 instr_1_1,Y,audio,,"Cool. Which ingredient do you think interacted with the particles to generrate or consume energy? In other words, which one should we carry forward with us? "
-instr_1_2a,Y,audio,,"Yes, that is correct. Well done. In a real scenario we would just carry that one with us, and leave all the rest behind. Now, let us move to the real lab. You need to find which of the real ingredients to carry forward with us. Remember, we want to take those which interact with the particles, irrespective of whether they produce or destroy energy. You should also try to predict accurately how much energy is expected to be produced or consumed by each combination of ingredients and the space particle that hit them. "
-instr_1_2b,N,audio,,"No, that one did not interact.  This one did. "
-instr_1_2bb,N,audio,,"Every time it was used to form the nebula the particles generated or consumed energy. Therefore, it is relevant to carry it forward with us as we can later make it collide with the right particle. "
+instr_1_2a,Y,audio,,"Yes, that is correct. Well done. In a real scenario we would just carry that one with us, and leave all the rest behind. Now, let us move to the real lab. "
+instr_1_2b,Y,audio,,"No, that one did not interact.  This one did. "
+instr_1_2bb,Y,audio,,"Every time it was used to form the nebula the particles generated or consumed energy. Therefore, it is relevant to carry it forward with us as we can later make it collide with the right particle. "
 instr_1_2b2,Y,audio,,Do you want more practice? 
-instr_1_2b3,Y,audio,,"Okay, let us move to the real lab. You need to find which ingredients to carry forward with us. You should also try to predict accurately how much energy is expected to be produced or consumed by each combination of ingredients and the space particle that hit them. "
-instr_1_3,Y,audio,,Let us get started. I hope you like my choice of music. Enjoy this classic. 
+instr_1_2b3,Y,audio,,"Okay, let us move tu the real lab. "
+instr_1_2b4,Y,audio,,"For now, just focus on identifying which ingredients to carry forward with us. Go experiment. I will come back in a bit to ask you about your findings. "
+instr_1_3,N,audio,,Here are the ingredients that you will be experimenting with. Good Luck. I hope you like my choice of music.

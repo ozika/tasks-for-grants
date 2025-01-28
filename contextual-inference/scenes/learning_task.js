@@ -37,6 +37,7 @@
         this.load.audio('instr_1_2bb', 'assets/sound/instructions/instr_1_2bb.wav');
         this.load.audio('instr_1_2b2', 'assets/sound/instructions/instr_1_2b2.wav');
         this.load.audio('instr_1_2b3', 'assets/sound/instructions/instr_1_2b3.wav');
+        this.load.audio('instr_1_2b4', 'assets/sound/instructions/instr_1_2b4.wav');
         this.load.audio('instr_1_3', 'assets/sound/instructions/instr_1_3.wav');
 
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
@@ -57,6 +58,14 @@
         this.load.image('stim4', 'assets/crystals.png');
         this.load.image('stim5', 'assets/stone.png');
         this.load.image('stim6', 'assets/letax.png');
+
+        this.load.image('realstim1', 'assets/donut.png');
+        this.load.image('realstim2', 'assets/red-blood-cells.png');
+        this.load.image('realstim3', 'assets/egg.png');
+        this.load.image('realstim4', 'assets/elixir.png');
+        this.load.image('realstim5', 'assets/mustard.png');
+        this.load.image('realstim6', 'assets/cube.png');
+
         this.load.image('handle', 'assets/gps.png');
         this.load.image('outcm-handle', 'assets/gps2.png');
 
@@ -172,6 +181,7 @@
 
         // Create group from contextual cues
         this.stimGr = this.add.group(); // Create a group
+        this.stimGrReal = this.add.group(); // Create a group
         const jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0];
      
         // Add 6 images at 60-degree increments
@@ -189,6 +199,14 @@
             spr.postFX.addGlow(0x283747, 4, 0);
             // blue 0xaeb6bf
             this.stimGr.add(spr);
+
+            let sti = this.add.sprite(x, y, 'realstim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
+            sti.setAlpha(0);
+            sti.postFX.addGlow(0x283747, 4, 0);
+            // blue 0xaeb6bf
+            this.stimGrReal.add(sti);
+
+
         }
 
         // create gradient texture
@@ -229,6 +247,7 @@
 
     async runTask() {
 
+
         // SHARP START
         this.lvl1music = this.sound.add('lvl1', {volume: 1, loop: true});
         if (this.lvl1music.isPlaying) {
@@ -239,11 +258,13 @@
         // INITIAL WAIT
         await this.waitFor(2000);
 
+        this.stimset = 1
+
         let cond = [];
         //cond[0] = { name: "train1", rel: "1" }; // make sure this is obvious like +20 -25
-        cond[0] = { name: "test", rel: "3" };
-        cond[1] = { name: "train2", rel: "1" };
-        cond[2] = { name: "main", rel: "3" };
+        cond[0] = { name: "train1", rel: "1", ratings: 0, stimset: 1 };
+        cond[1] = { name: "train2", rel: "1", ratings: 0, stimset: 1 };
+        cond[2] = { name: "main", rel: "3", ratings: 0, stimset: 2 };
 
         
         // RUN TRAINING
@@ -275,6 +296,7 @@
 
         // Check if they selected the correct stimulus
         if (clickedid = this.trialData[0].correct_stim) {
+            //this.stimGr.getChildren()[clickedid].alpha = 1
             await this.showInstructionButtons('instr_1_2a', 1, true);
 
         } else {
@@ -312,10 +334,29 @@
                 let clickedid = await this.getStimClick() 
             }
 
+            await this.showInstructionButtons('instr_1_2b3', 1, true);
+
         }
         
-        await this.waitFor(3000)
-        await this.showInstructionButtons('instr_1_2b3', 1, true);
+
+        // Change alpha back to baseline
+        this.stimGr.children.each((child) => {
+            child.destroy(); 
+        });
+
+        await this.waitFor(1500)
+       
+        this.showSparkleEffect(5000);
+        
+        await this.showInstructionButtons('instr_1_2b4', 1, true);
+        //await this.waitFor(4000)
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal.getChildren()[i].alpha=1;
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(200); 
+        }
+
         await this.showInstructionButtons('instr_1_3', 1, true);
 
 
@@ -326,9 +367,14 @@
         }
         this.lvl2music.play();
 
-        await this.waitFor(5000)
+        
+
+        
+
+        await this.waitFor(8000)
 
         // RUN MAIN TASK
+        this.stimset = 2
         await this.runTrials(cond[2]);
 
         this.tweens.add({
@@ -613,12 +659,19 @@ showStimulus(stpos) {
     console.log(`St pos ${stpos}`);
     console.log(`Showing stimulus at position ${stpos}`);
 
+    if (this.stimset == 1) {
+        group = this.stimGr
+    } else if (this.stimset == 2) {
+        group =this.stimGrReal
+
+    }
+
     // Ensure position is valid
-    if (stpos < 0 || stpos >= this.stimGr.getChildren().length) {
+    if (stpos < 0 || stpos >= group.getChildren().length) {
         console.error(`Invalid stimulus position: ${stpos}`);
         return;
     }
-    let targetStim = this.stimGr.getChildren()[stpos]; // Get the image by index
+    let targetStim = group.getChildren()[stpos]; // Get the image by index
     var stimFlash = this.tweens.chain({ 
         targets: targetStim, 
         start: true,
