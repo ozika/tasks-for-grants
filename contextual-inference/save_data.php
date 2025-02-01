@@ -14,10 +14,6 @@ if ($data_array != null)
     $file = fopen("data/" . $subid . ".json", "w") or die("Unable to open file!");
     fwrite($file, json_encode($payload));
     fclose($file);
-
-    $file = fopen("../../../../../home/cloud/contextual-inference-data/" . $subid . ".json", "w") or die("Unable to open file!");
-    fwrite($file, json_encode($payload));
-    fclose($file);
 }
 else
 {

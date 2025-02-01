@@ -47,8 +47,8 @@
 
         // Get the 'id' parameter from the URL
         const idValue = params.get("id");
-        var m2 = parseInt(idValue.charAt(3), 10);  // Second character
-        var schid = parseInt(idValue.charAt(idValue.length - 1), 10);  // Last character
+        var m2 = parseInt(idValue.charAt(3), 10);  // Second character 2 OR 4
+        var schid = parseInt(idValue.charAt(idValue.length - 1), 10);  // Last character 0 to 4
 
 
         
@@ -70,7 +70,7 @@
         var seq, td
 
         var targets, t1, t2
-        var flag = "_test"
+        var flag = ""
 
         // INTRO SCENE
         
