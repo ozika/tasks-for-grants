@@ -55,6 +55,7 @@ class BaseScene extends Phaser.Scene {
     
     fetchData(schedule_name) {
         return new Promise((resolve) => {
+            console.log("fetching "+ "schedules/"+schedule_name)
             fetch('schedules/'+schedule_name)
             .then(response => {
                 // Check if the response is successful (status code 200–299)
@@ -211,18 +212,15 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
-    animateCosmicParticle(target=0) {
+    animateCosmicParticle(target=0, x0=this.cameras.main.centerX, y0=0, xend=this.cameras.main.centerX, yend=this.cameras.main.centerY) {
         return new Promise((resolve) => {
             this.particlesound.play();
-            const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY;
-
             // Get the target index and corresponding color
             const targetIndex = target; // Target index (0 or 1)
             const targetColor = targetIndex === 0 ? 0xe74c3c : 0x45b39d; // Example colors for two targets
 
             // Create the cosmic particle
-            const cosmicParticle = this.add.particles(centerX, 0, 'flares', {
+            const cosmicParticle = this.add.particles(x0, y0, 'flares', {
                 frame: ['white'],
                 color: [targetColor],
                 lifespan: 300,
@@ -237,8 +235,8 @@ class BaseScene extends Phaser.Scene {
             this.tweens.add({
                 targets: cosmicParticle,
                 props: {
-                    x: { value: centerX },
-                    y: { value: centerY },
+                    x: { value: xend },
+                    y: { value: yend },
                 },
                 duration: 350, // Adjust for the desired speed
                 ease: 'Linear',
@@ -291,10 +289,14 @@ class BaseScene extends Phaser.Scene {
                 fontSize: '14px',
                 color: "#16a085"
             });
+            this.trialData[this.tridx]["t_slider_shown"] = performance.now();
             // ["#8e44ad", "#16a085"]
             // Drag functionality for the slider handle
             this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
                 if (gameObject === this.handle) {
+                    if (!this.scene.isActive('IntroScene') == true) {
+                        this.trialData[this.tridx]["t_first_click_on_handle"] = performance.now();
+                    }
                     // Clamp handle position to stay within scale line
                     gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
 
@@ -316,6 +318,9 @@ class BaseScene extends Phaser.Scene {
 
 
             this.submitButton.on('pointerdown', () => {
+                if (!this.scene.isActive('IntroScene') == true) {
+                    this.trialData[this.tridx]["t_response_made"] = performance.now();
+                }
                 console.log('Submitted rating:', this.currentRating);
                 //save rating 
                 console.log("Is intro scene:" + (this.scene.isActive('IntroScene') == true))
@@ -388,6 +393,9 @@ class BaseScene extends Phaser.Scene {
         console.log("Sprites are no longer interactive");
     } 
 
+
+    
+
     async waitForStimClick() {
         return new Promise((resolve) => {
             console.log("inside waitForStimClick")
@@ -410,6 +418,56 @@ class BaseScene extends Phaser.Scene {
             });
 
 
+        });
+    }
+
+    async getStimClicks() {
+        console.log("inside getStimClicks");
+        const centerX = this.cameras.main.centerX;
+        this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
+        this.subbutton.setDisplaySize(40, 40); // Adjust size as needed
+        this.subbutton.preFX.addGlow(0x5dade2)
+        
+        let selectedStimuli = new Set(); // Store selected stimulus indices
+    
+        // Enable interactivity for all sprites
+        let group = 1
+        if (this.stimset==2) {
+                group =this.stimGrReal
+        } else if (this.stimset==3) {
+                group =this.stimGrReal2
+
+        }
+
+        group.children.each((sprite, index) => {
+            sprite.setInteractive();
+            sprite.setAlpha(0.1); // Default low alpha
+    
+            sprite.on('pointerdown', () => {
+                if (selectedStimuli.has(index)) {
+                    selectedStimuli.delete(index);
+                    sprite.setAlpha(0.1); // Deselect
+                } else {
+                    selectedStimuli.add(index);
+                    sprite.setAlpha(1); // Select
+                }
+            });
+        });
+    
+        // Wait for the submit button click
+        await this.waitForSubmitClick();
+    
+        console.log(`Player selected stimuli with IDs: ${Array.from(selectedStimuli)}`);
+    
+        return Array.from(selectedStimuli);
+    }
+    
+    async waitForSubmitClick() {
+        return new Promise((resolve) => {
+            this.subbutton.once('pointerdown', () => {
+                this.subbutton.destroy()
+                resolve(); // Resolve when submit button is clicked
+            });
         });
     }
 
@@ -453,39 +511,39 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
-    showOutcomeText(outcome) {
+    showOutcomeText(outcome, x=this.cameras.main.centerX, y=this.cameras.main.centerY) {
         return new Promise((resolve) => {
-            const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY;
-
-            // Determine glow color based on the outcome
-            const glowHexColor = outcome > 0 ? '#16a085': '#8e44ad';
+            const glowHexColor = outcome > 0 ? '#16a085' : '#8e44ad';
             const txtColor = outcome > 0 ? '#a3e4d7' : '#d7bde2';
-            //["#8e44ad", "#16a085"]
-
-            if (outcome>0) {
-                this.engain.play()
+    
+            // Play sound effect
+            if (outcome > 0) {
+                this.engain.play();
             } else {
-                this.enloss.play()
+                this.enloss.play();
             }
-
-            // Add the outcome text
-            const outcomeText = this.add.text(centerX, centerY, `${outcome} MW!`, {
+    
+            // Show outcome text at the specified position
+            const outcomeText = this.add.text(x, y, `${outcome} MW!`, {
                 fontSize: '26px',
                 fontFamily: 'Arial',
                 color: txtColor,
                 align: 'center',
             }).setOrigin(0.5);
-
-            // Add crimson glow effect
-            outcomeText.setStroke(glowHexColor, 6); // Crimson stroke around the text
-            outcomeText.setShadow(2, 2, glowHexColor, 10, true, true); // Crimson glow effect
-
-            // Remove the text after 2 seconds and resolve the promise
+            if (!this.scene.isActive('IntroScene') == true) {
+                this.trialData[this.tridx]["t_outcome_txt_shown"] = performance.now();
+            }
+    
+            outcomeText.setStroke(glowHexColor, 6);
+            outcomeText.setShadow(2, 2, glowHexColor, 10, true, true);
+    
+            // Remove text after 2 seconds
             this.time.delayedCall(2000, () => {
                 outcomeText.destroy();
-
-                resolve(); // Resolve the promise after the text disappears
+                if (!this.scene.isActive('IntroScene') == true) {
+                    this.trialData[this.tridx]["t_outcome_txt_removed"] = performance.now();
+                }
+                resolve();
             });
         });
     }
@@ -502,7 +560,41 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
-    showSparkleEffect(duration) {
+    stopGentleMotion() {
+        if (this.sparkTween) {
+            this.sparkTween.stop(); // Stop the current tween
+            this.sparkTween = null; // Clear the reference
+        }
+        this.gentlemotion = 0; // Ensure the flag is set to stop motion
+    }
+
+    createGentleMotion() {
+        const padding = 50; // Ensure the spark stays within bounds
+        const randomX = () => Phaser.Math.Between(padding, 800 - padding);
+        const randomY = () => Phaser.Math.Between(padding, 600 - padding);
+
+        const moveSpark = () => {
+            if (this.gentlemotion === 1) { // Only move the spark if gentlemotion is active
+                const sparkTween = this.tweens.add({
+                    targets: this.spark,
+                    x: randomX(),
+                    y: randomY(),
+                    duration: Phaser.Math.Between(4000, 6000), // Smooth motion duration
+                    ease: 'Sine.easeInOut',
+                    onComplete: () => {
+                        moveSpark(); // Recursively call for continuous motion
+                    }
+                });
+
+                // Save the reference to the active tween for cleanup
+                this.sparkTween = sparkTween;
+            }
+        };
+
+        moveSpark(); // Start the initial tween
+    }
+
+    blinkStars(duration) {
         // Create a group for blue flares
         this.stars = this.add.group({
             key: 'flares',
@@ -663,7 +755,8 @@ class BaseScene extends Phaser.Scene {
         const centerY = this.cameras.main.centerY;
         return new Promise((resolve) => {
             // Add replay button
-            
+            //const centerX = this.cameras.main.centerX;
+            //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
             const continueButton = this.add.sprite(centerX+200, 500, 'submit2').setOrigin(0.5).setInteractive();
             continueButton.setDisplaySize(40, 40); // Adjust size as needed
             //continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
@@ -675,7 +768,7 @@ class BaseScene extends Phaser.Scene {
                 //replayButton.preFX.addGlow(0x87CEFA); // Light blue glow
 
                 // Play the instruction sound initially
-                const instructionSound = this.sound.add(instr_string, {volume: 0.5});
+                const instructionSound = this.sound.add(instr_string, {volume: 1});
                 instructionSound.play();
 
                 if (!instructionSound.isPlaying & skipbuttons==true) {

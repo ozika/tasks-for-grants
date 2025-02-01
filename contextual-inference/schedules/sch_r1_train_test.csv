@@ -1,0 +1,5 @@
+,"index","tr_id","no_rel_ctxts","target","rel_cond","correct_stim","no_shown","relevance_stim1","relevance_stim2","condition_stim1","condition_stim2","condition_id_stim1","condition_id_stim2","outcome_rel_stim1","outcome_rel_stim2","outcome_t1_stim1","outcome_t1_stim2","outcome_t2_stim1","outcome_t2_stim2","stim_stim1","stim_stim2","stim_positions_stim1","stim_positions_stim2","outcome","t1_ev","t2_ev","require_rating","suit_for_dec","decision"
+"1","1","15","1","1","rel1","5","2","rel","irr","low","irr","1","5","5","0","5","0","-15","0","13","18","6","3","6","5","-15","0","1","1"
+"2","2","2","1","2","rel1","5","2","irr","rel","irr","low","5","1","0","-15","0","5","0","-15","18","13","3","6","-19","5","-15","0","1","0"
+"11","11","10","1","2","rel1","5","2","rel","irr","low","irr","1","2","-15","0","5","0","-15","0","13","19","6","1","-17","5","-15","1","1","0"
+"15","15","9","1","1","rel1","5","2","rel","irr","low","irr","1","6","5","0","5","0","-15","0","13","12","6","4","2","5","-15","1","1","1"

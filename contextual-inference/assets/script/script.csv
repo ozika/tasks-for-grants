@@ -10,7 +10,7 @@ instr7,Y,audio,Show resources and nebula,You will be experimenting with six reso
 instr8,Y,audio,,The nebula serves as an incubation zone for an incoming high-speed particle. Once the nebula is hit by a particle we will be able to measure the energy that is released and consumed. Look. 
 instr8b,Y,audio,,The particle turned the nebula red. Let us measure the energy. 
 instr8c,Y,audio,,"The star-shaped resource created a nebula which reacted with a red particle. It produced 80 megawatts of energy. That is great. However, sometimes the collisions lead to a loss of energy. "
-instr8d,Y,audio,,"Now, the star shaped resource created a nebula which reacted with the blue particle. It lost us 80 megawatts of energy. That is not great. However, the point of the first phase is to learn which of our resources interact with the particles. We can later use this property to harness energy. "
+instr8d,N,audio,,"Now, the star shaped resource created a nebula which reacted with the blue particle. It lost us 80 megawatts of energy. That is not great. However, the point of the first phase is to learn which of our resources interact with the particles. We can later use this property to harness energy. "
 instr9,Y,audio,off,"You see, there is a small issue. What I haven't told you yet is that we are currenty on the outskirs of the Solar system and we have very. very. limited amount of energy. If all our energy gets used up, we won't make it to our destination planet, or back to Earth. "
 instr10,Y,audio,,Here is what you will du. In the first phase you will be observing how combinations of different resources interact with two types of high-energy particles. We need to learn which resources interact with the particles and which du not.  
 instr11,Y,audio,after: sample trial starts - the outcome is within 20 points of the expectation,"During each experiment, a number of resources will be used to form the nebula. We then wait until it is hit by a particle. 
@@ -18,7 +18,7 @@ The particles change the color of the nebula, so that we know which particle we 
 Try it now."
 instr12,Y,audio,after: three sample trials which dont go too well ,Your prediction was pretty accurate. That is all that counts for now. Great job! Try a few more.
 instr13,Y,audio,,No worries. The whole point of these experiments is to figure this out.
-instr14,Y,audio,,Here is the real deal. How to put this. We can't carry all of the ingredients with us forward. We have six now but we need to get rid of some to be able to continue. You need to figure out which ones to drop. 
+instr14,N,audio,,Here is the real deal. How to put this. We can't carry all of the ingredients with us forward. We need to get rid of some to be able to continue. You need to figure out which ones to drop. 
 instr15,Y,audio,,"First, I have a little simulated environment for you. To practice. In this simulation only one of the ingredients interacts with the particles. Your task is to figure out which one. Are you ready? "
 instr15b,Y,audio,,"Okay, let us get started. "
 instr16,Y,audio,,"Last thing, let us put some music on. As you can tell by now I am a very fun person. This is my favourite. "
@@ -29,4 +29,13 @@ instr_1_2bb,Y,audio,,"Every time it was used to form the nebula the particles ge
 instr_1_2b2,Y,audio,,Do you want more practice? 
 instr_1_2b3,Y,audio,,"Okay, let us move tu the real lab. "
 instr_1_2b4,Y,audio,,"For now, just focus on identifying which ingredients to carry forward with us. Go experiment. I will come back in a bit to ask you about your findings. "
-instr_1_3,N,audio,,Here are the ingredients that you will be experimenting with. Good Luck. I hope you like my choice of music.
+instr_1_3,Y,audio,,Here are the ingredients that you will be experimenting with. Good Luck. I hope you like my choice of music.
+instr_choice,Y,audio,,We managed to catch two particles at once. Choose the one that you think will generate us more energy given the used resources. 
+instr_2_1,Y,audio,,Okay. Which of the ingredients should we carry forward with us. 
+instr_2_2,Y,audio,,Let us hope you are right. 
+instr_2_3,Y,audio,,Are you ready for the next set of ingredients? 
+instr_3_1,Y,audio,,I am sure you are right. Throwing away all the other ingredients now. 
+instr_3_2_mostly,Y,audio,,Thank you for your help. It looks like you found the righ ingredients. Mostly. Good job.
+instr_3_2_right,Y,audio,,Thank you for your help. It looks like you found the righ ingredients. Great. We are saved. 
+instr_3_2_wrong,Y,audio,,Thank you for your help. Though it looks like you did not find the correct ingredients. We are doomed. 
+instr_3_3,Y,audio,,"This is all for now, good bye. One more thing. A song. "

@@ -6,10 +6,10 @@
     <title>Experimental Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.85.2/phaser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="scenes/BaseScene.js"></script>
-    <script src="scenes/tutorial.js"></script>
-    <script src="scenes/learning_task.js"></script>
-    <script src="scenes/template_scene.js"></script>
+    <script src="scenes/BaseScene.js?r=123"></script>
+    <script src="scenes/tutorial.js?r=123"></script>
+    <script src="scenes/learning_task.js?r=123"></script>
+    <script src="scenes/template_scene.js?r=123"></script>
 
     <style>
         body {
@@ -39,6 +39,18 @@
     <div id="game-container"></div>
 
     <script>
+
+
+        // Run the function when the page loads
+        const params = new URLSearchParams(window.location.search);
+        console.log(params)
+
+        // Get the 'id' parameter from the URL
+        const idValue = params.get("id");
+        var m2 = parseInt(idValue.charAt(3), 10);  // Second character
+        var schid = parseInt(idValue.charAt(idValue.length - 1), 10);  // Last character
+
+
         
         // run php server locally https://serverfault.com/questions/338394/how-to-run-php-with-simplehttpserver
         var stim_dim_x = 50
@@ -52,12 +64,13 @@
 
         var cX = 400
         var cY = 300
-        var r = 150
+        var r = 200
 
         var trialData
         var seq, td
 
         var targets, t1, t2
+        var flag = "_test"
 
         // INTRO SCENE
         
@@ -80,6 +93,8 @@
         };
 
         const game = new Phaser.Game(config);
+
+        //game.scene.start('IntroScene', { "m2": m2, "schid": schid });
 
     
         

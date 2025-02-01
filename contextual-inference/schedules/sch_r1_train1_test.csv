@@ -1,9 +1,0 @@
-tr_id,no_rel_ctxts,target,rel_cond,target,correct_stim,no_shown,relevance_stim1,relevance_stim2,condition_stim1,condition_stim2,condition_id_stim1,condition_id_stim2,outcome_stim1,outcome_stim2,stim_stim1,stim_stim2,stim_positions_stim1,stim_positions_stim2,outcome
-1,1,1,rel1,1,4,2,irr,irr,irr,irr,6,3,0,0,18,16,6,1,0.0
-8,1,2,rel1,2,4,2,irr,irr,irr,irr,2,6,0,0,11,18,4,6,0.0
-5,1,1,rel1,1,4,2,irr,rel,irr,low-mid,2,1,0,15,11,14,4,5,15.0
-4,1,2,rel1,2,4,2,irr,irr,irr,irr,6,3,0,0,18,16,6,1,0.0
-7,1,1,rel1,1,4,2,irr,irr,irr,irr,3,2,0,0,16,11,1,4,0.0
-2,1,2,rel1,2,4,2,irr,irr,irr,irr,6,5,0,0,18,15,6,3,0.0
-6,1,2,rel1,2,4,2,irr,irr,irr,irr,3,4,0,0,16,20,1,2,0.0
-3,1,1,rel1,1,4,2,irr,irr,irr,irr,6,3,0,0,18,16,6,1,0.0

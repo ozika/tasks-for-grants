@@ -1,0 +1,5 @@
+,index,tr_id,no_rel_ctxts,target,rel_cond,correct_stim,no_shown,relevance_stim1,relevance_stim2,condition_stim1,condition_stim2,condition_id_stim1,condition_id_stim2,outcome_rel_stim1,outcome_rel_stim2,outcome_t1_stim1,outcome_t1_stim2,outcome_t2_stim1,outcome_t2_stim2,stim_stim1,stim_stim2,stim_positions_stim1,stim_positions_stim2,outcome,t1_ev,t2_ev,require_rating,suit_for_dec,decision
+0,0,4,2,2,rel2,2,2,irr,irr,irr,irr,3,6,0,0,0,0,0,0,23,25,2,1,0.0,0,0,0,0,0
+1,1,3,2,1,rel2,2,2,irr,rel,irr,high3,5,1,0,20,0,20,0,-40,29,26,5,3,23.0,20,-40,1,1,1
+2,2,2,2,2,rel2,2,2,rel,irr,high4,irr,2,4,40,0,-20,0,40,0,21,28,4,6,39.0,-20,40,1,1,1
+3,3,1,2,1,rel2,2,2,rel,irr,high3,irr,1,4,20,0,20,0,-40,0,26,28,3,6,20.0,20,-40,1,1,0

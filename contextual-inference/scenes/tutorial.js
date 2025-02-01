@@ -3,7 +3,10 @@ class IntroScene extends BaseScene {
         super('IntroScene');
     }
 
+
+
     create() {
+
 
         
 
@@ -132,6 +135,7 @@ class IntroScene extends BaseScene {
         this.instr.y =200
 
         // do the above for 10s
+        this.blinkStars(10000);
         await this.waitFor(10000); // realMode 10000
         
 
@@ -501,37 +505,5 @@ class IntroScene extends BaseScene {
     
     
 
-    stopGentleMotion() {
-        if (this.sparkTween) {
-            this.sparkTween.stop(); // Stop the current tween
-            this.sparkTween = null; // Clear the reference
-        }
-        this.gentlemotion = 0; // Ensure the flag is set to stop motion
-    }
-
-    createGentleMotion() {
-        const padding = 50; // Ensure the spark stays within bounds
-        const randomX = () => Phaser.Math.Between(padding, 800 - padding);
-        const randomY = () => Phaser.Math.Between(padding, 600 - padding);
-
-        const moveSpark = () => {
-            if (this.gentlemotion === 1) { // Only move the spark if gentlemotion is active
-                const sparkTween = this.tweens.add({
-                    targets: this.spark,
-                    x: randomX(),
-                    y: randomY(),
-                    duration: Phaser.Math.Between(4000, 6000), // Smooth motion duration
-                    ease: 'Sine.easeInOut',
-                    onComplete: () => {
-                        moveSpark(); // Recursively call for continuous motion
-                    }
-                });
-
-                // Save the reference to the active tween for cleanup
-                this.sparkTween = sparkTween;
-            }
-        };
-
-        moveSpark(); // Start the initial tween
-    }
+    
 }

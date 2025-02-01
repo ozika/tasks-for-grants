@@ -1,0 +1,17 @@
+,index,tr_id,no_rel_ctxts,target,rel_cond,correct_stim,no_shown,relevance_stim1,relevance_stim2,condition_stim1,condition_stim2,condition_id_stim1,condition_id_stim2,outcome_rel_stim1,outcome_rel_stim2,outcome_t1_stim1,outcome_t1_stim2,outcome_t2_stim1,outcome_t2_stim2,stim_stim1,stim_stim2,stim_positions_stim1,stim_positions_stim2,outcome,t1_ev,t2_ev,require_rating,suit_for_dec,decision
+0,0,11,1,1,rel1,5,2,irr,irr,irr,irr,6,5,0,0,0,0,0,0,12,18,4,3,2.0,0,0,0,0,0
+1,1,15,1,1,rel1,5,2,rel,irr,low,irr,1,5,5,0,5,0,-15,0,13,18,6,3,6.0,5,-15,0,1,0
+2,2,2,1,2,rel1,5,2,irr,rel,irr,low,5,1,0,-15,0,5,0,-15,18,13,3,6,-19.0,5,-15,0,1,0
+3,3,4,1,2,rel1,5,2,irr,irr,irr,irr,5,2,0,0,0,0,0,0,18,19,3,1,-3.0,0,0,0,0,0
+4,4,5,1,1,rel1,5,2,irr,irr,irr,irr,5,4,0,0,0,0,0,0,18,20,3,2,0.0,0,0,0,0,0
+5,5,7,1,1,rel1,5,2,irr,irr,irr,irr,4,5,0,0,0,0,0,0,20,18,2,3,-1.0,0,0,0,0,0
+6,6,3,1,1,rel1,5,2,irr,irr,irr,irr,2,3,0,0,0,0,0,0,19,11,1,5,2.0,0,0,0,0,0
+7,7,16,1,2,rel1,5,2,irr,irr,irr,irr,5,4,0,0,0,0,0,0,18,20,3,2,-1.0,0,0,0,0,0
+8,8,6,1,2,rel1,5,2,irr,irr,irr,irr,2,4,0,0,0,0,0,0,19,20,1,2,0.0,0,0,0,0,0
+9,9,8,1,2,rel1,5,2,irr,irr,irr,irr,5,6,0,0,0,0,0,0,18,12,3,4,-2.0,0,0,0,0,0
+10,10,1,1,1,rel1,5,2,irr,irr,irr,irr,5,2,0,0,0,0,0,0,18,19,3,1,-1.0,0,0,1,0,0
+11,11,10,1,2,rel1,5,2,rel,irr,low,irr,1,2,-15,0,5,0,-15,0,13,19,6,1,-17.0,5,-15,1,1,0
+12,12,14,1,2,rel1,5,2,irr,irr,irr,irr,2,6,0,0,0,0,0,0,19,12,1,4,-3.0,0,0,1,0,0
+13,13,12,1,2,rel1,5,2,irr,irr,irr,irr,6,5,0,0,0,0,0,0,12,18,4,3,1.0,0,0,1,0,0
+14,14,13,1,1,rel1,5,2,irr,irr,irr,irr,2,4,0,0,0,0,0,0,19,20,1,2,-1.0,0,0,1,0,0
+15,15,9,1,1,rel1,5,2,rel,irr,low,irr,1,6,5,0,5,0,-15,0,13,12,6,4,2.0,5,-15,1,1,1

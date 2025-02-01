@@ -4,7 +4,7 @@
         super('ExperimentScene');
     }
     
-
+    
     preload() {
         // Preload assets
         this.load.image('space', 'assets/nightsky.png');
@@ -39,11 +39,22 @@
         this.load.audio('instr_1_2b3', 'assets/sound/instructions/instr_1_2b3.wav');
         this.load.audio('instr_1_2b4', 'assets/sound/instructions/instr_1_2b4.wav');
         this.load.audio('instr_1_3', 'assets/sound/instructions/instr_1_3.wav');
+        this.load.audio('instr_2_1', 'assets/sound/instructions/instr_2_1.wav');
+        this.load.audio('instr_2_2', 'assets/sound/instructions/instr_2_2.wav');
+        this.load.audio('instr_2_3', 'assets/sound/instructions/instr_2_3.wav');
+        this.load.audio('instr_choice', 'assets/sound/instructions/instr_choice.wav');
+        this.load.audio('instr_3_1', 'assets/sound/instructions/instr_3_1.wav');
+        this.load.audio('instr_3_2_right', 'assets/sound/instructions/instr_3_2_right.wav');
+        this.load.audio('instr_3_2_mostly', 'assets/sound/instructions/instr_3_2_mostly.wav');
+        this.load.audio('instr_3_2_wrong', 'assets/sound/instructions/instr_3_2_wrong.wav');
+        this.load.audio('instr_3_3', 'assets/sound/instructions/instr_3_3.wav');
+
 
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
         this.load.audio('lvl2', 'assets/sound/soundtrack/game_music6.mp3');
         this.load.audio('lvl3', 'assets/sound/soundtrack/game_music7.mp3');
+        this.load.audio('final_music', 'assets/sound/soundtrack/quirky_game_music.mp3');
 
         this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
         this.load.audio('evee_swish', 'assets/sound/effects/evee_swish.wav');
@@ -66,10 +77,16 @@
         this.load.image('realstim5', 'assets/mustard.png');
         this.load.image('realstim6', 'assets/cube.png');
 
+        this.load.image('realstim21', 'assets/sd.png');
+        this.load.image('realstim22', 'assets/cheese.png');
+        this.load.image('realstim23', 'assets/oil.png');
+        this.load.image('realstim24', 'assets/grass.png');
+        this.load.image('realstim25', 'assets/frost.png');
+        this.load.image('realstim26', 'assets/soil.png');
+
         this.load.image('handle', 'assets/gps.png');
         this.load.image('outcm-handle', 'assets/gps2.png');
 
-        this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
 
 
 
@@ -77,17 +94,26 @@
 
     create() {
         
+        this.schid = schid
+        this.m2 = m2
+        this.flag=flag
+        this.stimset = 1
         this.cfg =[] 
         this.cfg.ctx_alpha_baseline = 0.1
         this.cfg.ctx_alpha_peak = 1
         this.cfg.tar_alpha_baseline = 0.1
 
-        this.subID = "testID"
+        this.cfg.evee_volume = 1
+
+        this.subID = idValue
 
         this.sparksound = this.sound.add('spark', {volume: 0.5});
         this.particlesound = this.sound.add('particle', {volume: 0.5})
         this.engain = this.sound.add('engain', {volume: 0.5})
         this.enloss = this.sound.add('enloss', {volume: 0.5});
+
+        this.centerX = this.cameras.main.centerX;
+        this.centerY = this.cameras.main.centerY;
 
         // Background setup
         this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
@@ -152,6 +178,63 @@
                 });
             });
 
+
+
+        // CREATE particles and wells for decision trials
+        this.target_particles_1 = this.add.particles(this.centerX - 100, 300, 'flares', {
+            frame: ['white'],
+            color: [0xe74c3c], // Left particle color (red)
+            lifespan: 2000,
+            speed: 200,
+            quantity: 2,
+            scale: { start: 0.25, end: 0.1 },
+            blendMode: 'SCREEN',
+        });
+        this.target_particles_1.stop()
+        
+        this.target_particles_2 = this.add.particles(this.centerX + 100, 300, 'flares', {
+            frame: ['white'],
+            color: [0x5dade2], // Right particle color (blue)
+            lifespan: 2000,
+            speed: 200,
+            quantity: 2,
+            scale: { start: 0.25, end: 0.1 },
+            blendMode: 'SCREEN',
+        });
+        this.target_particles_2.stop()
+        
+        // Create two gravity wells
+        this.target_particles_1_well = this.target_particles_1.createGravityWell({
+            x: 0,
+            y: 0,
+            power: 1,
+            epsilon: 80,
+            gravity: 30,
+        });
+        
+        this.target_particles_2_well = this.target_particles_2.createGravityWell({
+            x: 0,
+            y: 0,
+            power: 1,
+            epsilon: 80,
+            gravity: 30,
+        });
+
+        //Make EVEEE
+
+        this.spark = this.add.particles(400, 300, 'flares', {
+            frame: ['blue'],
+            x: 0,
+            y: 0,
+            lifespan: 600,
+            speed: 100,
+            quantity: 1,
+            scale: { start: 0.3, end: 0 },
+            blendMode: 'ADD'
+        });
+        this.spark.wellactive = false
+        this.spark.stop()
+
         /*
         // Prepare gravity black hole
         this.dyn = this.add.particles(400,300, 'flares', {
@@ -182,6 +265,7 @@
         // Create group from contextual cues
         this.stimGr = this.add.group(); // Create a group
         this.stimGrReal = this.add.group(); // Create a group
+        this.stimGrReal2 = this.add.group(); // Create a group
         const jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0];
      
         // Add 6 images at 60-degree increments
@@ -205,6 +289,12 @@
             sti.postFX.addGlow(0x283747, 4, 0);
             // blue 0xaeb6bf
             this.stimGrReal.add(sti);
+
+            let sti2 = this.add.sprite(x, y, 'realstim2' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
+            sti2.setAlpha(0);
+            sti2.postFX.addGlow(0x283747, 4, 0);
+            // blue 0xaeb6bf
+            this.stimGrReal2.add(sti2);
 
 
         }
@@ -238,7 +328,7 @@
         
 
         
-
+        
         this.runTask();
 
 
@@ -258,15 +348,17 @@
         // INITIAL WAIT
         await this.waitFor(2000);
 
-        this.stimset = 1
+        
 
         let cond = [];
         //cond[0] = { name: "train1", rel: "1" }; // make sure this is obvious like +20 -25
-        cond[0] = { name: "train1", rel: "1", ratings: 0, stimset: 1 };
-        cond[1] = { name: "train2", rel: "1", ratings: 0, stimset: 1 };
-        cond[2] = { name: "main", rel: "3", ratings: 0, stimset: 2 };
+        cond[0] = { name: "train", rel: "1"};
+        cond[1] = { name: "train", rel: "1" };
+        cond[2] = { name: "main1", rel: "3" };
+        cond[3] = { name: "main2", rel: this.m2.toString() };
 
-        
+        this.first_decision_made = 0
+
         // RUN TRAINING
         await this.runTrials(cond[0]);
         this.tweens.add({
@@ -282,7 +374,10 @@
             //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
             await this.waitFor(100); 
         }
-        await this.showInstructionButtons('instr_1_1', 1, true);
+
+        // await this.showInstructionButtons('instr_1_1', 1, true);
+        let instructionSound = this.sound.add('instr_1_1', {volume: 1});
+        instructionSound.play();
 
         // Collect a click
         let clickedid = await this.getStimClick() 
@@ -294,16 +389,28 @@
         });
         this.sound.stopAll();
 
+        console.log("Correct stim: " + this.trialData[0].correct_stim)
         // Check if they selected the correct stimulus
-        if (clickedid = this.trialData[0].correct_stim) {
+        if (clickedid == this.trialData[0].correct_stim) {
             //this.stimGr.getChildren()[clickedid].alpha = 1
             await this.showInstructionButtons('instr_1_2a', 1, true);
 
         } else {
             while (clickedid !=this.trialData[0].correct_stim) {
-                await this.showInstructionButtons('instr_1_2b', 1, true);
+                for (let i = 0; i < 6; i++) { 
+                    this.stimGr.getChildren()[i].alpha=0.1;
+                    //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+                    //await this.waitFor(100); 
+                }
+
+                let i_1_2b = this.sound.add('instr_1_2b', {volume: 1});
+                i_1_2b.play();
+    
+                await this.waitFor(2500)
 
                 this.stimGr.getChildren()[this.trialData[0].correct_stim].alpha = 1
+
+                await this.waitFor(4500)
 
                 await this.showInstructionButtons('instr_1_2bb', 1, true);
                 await this.showInstructionButtons('instr_1_2b2', 1, true);
@@ -318,7 +425,7 @@
 
                 this.tweens.add({
                     targets: this.lvl1music,
-                    volume: 0.02,
+                    volume: 0,
                     duration: 4000 // Original duration
                 });
                 await this.waitFor(3500)
@@ -329,9 +436,13 @@
                     //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
                     await this.waitFor(100); 
                 }
-                await this.showInstructionButtons('instr_1_1', 1, true);
+                // await this.showInstructionButtons('instr_1_1', 1, true);
+                //let instructionSound = this.sound.add('instr_1_1', {volume: 1});
+                instructionSound.play();
+
                 // Collect a click
-                let clickedid = await this.getStimClick() 
+                clickedid = await this.getStimClick() 
+                console.log("Correct stim: " + this.trialData[0].correct_stim)
             }
 
             await this.showInstructionButtons('instr_1_2b3', 1, true);
@@ -346,13 +457,13 @@
 
         await this.waitFor(1500)
        
-        this.showSparkleEffect(5000);
+        this.blinkStars(5000);
         
         await this.showInstructionButtons('instr_1_2b4', 1, true);
         //await this.waitFor(4000)
 
         for (let i = 0; i < 6; i++) { 
-            this.stimGrReal.getChildren()[i].alpha=1;
+            this.stimGrReal.getChildren()[i].alpha=0.5;
             //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
             await this.waitFor(200); 
         }
@@ -368,22 +479,130 @@
         this.lvl2music.play();
 
         
-
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal.getChildren()[i].alpha=0.1;
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(200); 
+        }
         
 
         await this.waitFor(8000)
 
-        // RUN MAIN TASK
+        // RUN MAIN TASK I
         this.stimset = 2
         await this.runTrials(cond[2]);
 
         this.tweens.add({
-            targets: this.lvl1music,
-            volume: 0.02,
+            targets: this.lvl2music,
+            volume: 0,
             duration: 4000 // Original duration
         });
-        await this.waitFor(3500)
 
+        await this.waitFor(2000)
+        await this.showInstructionButtons('instr_2_1', 1, true);
+
+        // Collect a click
+        //const centerX = this.cameras.main.centerX;
+        //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
+
+        
+        let post_rating = await this.getStimClicks() 
+
+        this.blinkStars(5000)
+
+        this.trialData.rated_relevant = post_rating
+        this.trialData.no_rated_relevant = post_rating.length
+
+        console.log("submitted relevant ctxts: " + this.trialData.rated_relevant)
+        console.log("no relevant ctxts: " + this.trialData.no_rated_relevant)
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal.getChildren()[i].alpha=0;
+            this.stimGrReal.getChildren()[i].disableInteractive()
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(20); 
+        }
+
+        await this.showInstructionButtons('instr_2_2', 1);
+
+        await this.waitFor(1500)
+
+        await this.showInstructionButtons('instr_2_3', 1);
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal2.getChildren()[i].alpha=0.1;
+            this.stimGrReal2.getChildren()[i].disableInteractive()
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(100); 
+        }
+
+        await this.waitFor(1000); 
+        // RUN next barch of 
+        this.lvl3music = this.sound.add('lvl3', {volume: 1, loop: true});
+        if (this.lvl3music.isPlaying) {
+            this.lvl3music.stop();
+        }
+        this.lvl3music.play();
+        await this.waitFor(5000); 
+
+        this.stimset = 3
+
+        await this.runTrials(cond[3]);
+
+        this.tweens.add({
+            targets: this.lvl3music,
+            volume: 0,
+            duration: 2500 // Original duration
+        });
+        await this.waitFor(2500)
+        await this.showInstructionButtons('instr_2_1', 1, true);
+
+        // Collect a click
+        //const centerX = this.cameras.main.centerX;
+        //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
+
+        
+        let post_rating2 = await this.getStimClicks() 
+
+        this.blinkStars(5000)
+
+        this.trialData.rated_relevant_2 = post_rating2
+        this.trialData.no_rated_relevant_2 = post_rating2.length
+
+        console.log("submitted relevant ctxts: " + this.trialData.rated_relevant_2)
+        console.log("no relevant ctxts: " + this.trialData.no_rated_relevant_2)
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal2.getChildren()[i].alpha=0;
+            this.stimGrReal2.getChildren()[i].disableInteractive()
+        }
+
+        this.blinkStars(10000);
+        this.spark.start()
+        await this.moveAndShowEvee(400, 300, 200, true);
+        this.waitFor(1000)
+        this.createGentleMotion()
+
+        await this.showInstructionButtons('instr_3_1', 1);
+
+        await this.showInstructionButtons('instr_3_2_mostly', 1);
+
+        await this.showInstructionButtons('instr_3_3', 1);
+
+        this.fin = this.sound.add('final_music', {volume: 1, loop: true});
+        if (this.fin.isPlaying) {
+            this.fin.stop();
+        }
+        this.fin.play();
+        await this.waitFor(5000)
+        this.tweens.add({
+            targets: this.fin,
+            volume: 0,
+            duration: 10000 // Original duration
+        });
+        await this.waitFor(5000)
+        this.sparkwell.gravity = 0
+        this.spark.stop()
         
         
 
@@ -393,8 +612,9 @@
 
     // Start trial and process stimuli sequence
     async runTrials(conf) {
-            var flag = "_test"
-            var cond_name = "r"+conf.rel +"_"+conf.name+flag
+            
+            
+            var cond_name = "r"+conf.rel +"_"+conf.name+"_"+this.schid.toString()+this.flag
             this.cond_name = cond_name
             await this.fetchData("sch_"+cond_name+".csv")
 
@@ -405,10 +625,8 @@
             } else {
                 console.log("sch_"+cond_name+".csv" + " succesfully loaded!")
             }
-            
-
-
             this.tridx = 0; 
+            this.trialData.t_loadstart = performance.now();
             this.notrials = this.trialData.length;
             this.timing = []
             this.timing.ctx_warupdown = 750;
@@ -422,6 +640,8 @@
             this.timing.isi2 = 1000
 
             for (let i = 0; i < this.notrials-1; i++) {
+                this.startMouseTrack()
+                this.trialData[this.tridx].t_trial_start = performance.now();
 
                 // Reset gravity well and particle properties for each trial
                 this.darkwell.gravity = 30
@@ -457,6 +677,7 @@
                 // Show text
                 //var txt =[]
                 //txt = this.showText("Particle incoming!", 400, 100, "18px")
+                this.trialData[this.tridx]["t_part_incoming_msg"] = performance.now();
                 let txtobj = this.add.text(400, 100, "Particle incoming!", {
                     fontSize: "18px",
                     fontFamily: 'Arial',
@@ -470,43 +691,119 @@
 
                 
 
-                // Cosmic particle animation
-                await this.animateCosmicParticle(this.trialData[this.tridx].target - 1);
-                // Safely destroy the text
-                txtobj.destroy();
-
-                // show the color of the target
-                this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
-                this.dark.stop()
-                // Show target
-                //await this.showTarget(this.trialData[this.tridx].target);
-                //this.dyn.speed = 300
-                //this.dynwell.gravity = 60
-
-                await this.waitFor(this.timing.target_dur);
-
-                // Display slider and wait for rating
-                await this.createSlider();
-                this.removeSlider()
-                //await this.waitForSliderInput();
-
                 
-                this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
-                
-                // ISI 2
-                await this.waitFor(this.timing.isi2);
-                this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
+                if (this.trialData[this.tridx].decision == 1 ) {
+                    
+                                        
+                    // stop particle incubator
+                    this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
+                    // assign rating NaN
+                    this.trialData[this.tridx].rating = "NaN"
 
-                // Show outcome text
-                await this.showOutcomeText(this.trialData[this.tridx].outcome);
+                    let chtext = this.add.text(400, 200, "Choose one to collect energy!", {
+                        fontSize: "18px",
+                        fontFamily: 'Arial',
+                        color: "#87D8FC",
+                        align: 'center',
+                    }).setOrigin(0.5);
+                    this.trialData[this.tridx]["t_ch_cosmic_particle_start"] = performance.now();
+                    this.animateCosmicParticle(0, this.centerX-200, 0, this.centerX-100, this.centerY);
+                    await this.animateCosmicParticle(1, this.centerX+200, 0, this.centerX+100, this.centerY);
+                    // Safely destroy the text
+                    txtobj.destroy();
+
+                    // Show two possible targets
+                    this.trialData[this.tridx]["t_ch_targets_shown"] = performance.now();
+                    this.target_particles_1.start();
+                    this.target_particles_2.start();
+                    this.dark.stop()
+
+                    if (this.first_decision_made == 0 & this.stimset == 1)  {
+                        this.tweens.add({
+                            targets: this.lvl1music,
+                            volume: 0.2,
+                            duration: 2000 // Original duration
+                        });
+                        await this.waitFor(2000)
+                        let ds = this.sound.add('instr_choice', {volume: 1});
+                        ds.play();
+                        await this.waitFor(8000)
+                        this.first_decision_made = 1
+                        this.tweens.add({
+                            targets: this.lvl1music,
+                            volume: 1,
+                            duration: 2000 // Original duration
+                        });
+                    }
+
+                    await this.decision_trial()
+                    chtext.destroy()
+
+                    await this.waitFor(3000);
+
+                } else {
+                    this.trialData[this.tridx].choice = "NaN";
+
+                    // Cosmic particle animation
+                    this.trialData[this.tridx]["t_cosmic_particle_start"] = performance.now();
+                    await this.animateCosmicParticle(this.trialData[this.tridx].target - 1);
+                    // Safely destroy the text
+                    txtobj.destroy();
+                    // show the color of the target
+                    this.trialData[this.tridx]["t_target_shown"] = performance.now();
+                    this.target_particles[this.trialData[this.tridx].target-1].dyn.start()
+                    this.dark.stop()
+                    // Show target
+                    //await this.showTarget(this.trialData[this.tridx].target);
+                    //this.dyn.speed = 300
+                    //this.dynwell.gravity = 60
+
+                    await this.waitFor(this.timing.target_dur);
+
+                    // Display slider and wait for rating
+                    if (this.trialData[this.tridx].require_rating == 1) {
+                        await this.createSlider();
+                        this.removeSlider()
+                        this.trialData[this.tridx]["t_slider_removed"] = performance.now();
+                    } else { 
+                        this.trialData[this.tridx].rating = "NaN"
+                    }
+                    //await this.waitForSliderInput();
+
+                    
+                    this.target_particles[this.trialData[this.tridx].target-1].dyn.stop()
+
+                    // ISI 2
+                    await this.waitFor(this.timing.isi2);
+                    this.target_particles[this.trialData[this.tridx].target-1].dynwell.gravity = 0
+
+                    // Show outcome text
+                    await this.showOutcomeText(this.trialData[this.tridx].outcome);
+
+                }
+                
+                
+                
 
                 // Change alpha back to baseline
-                this.stimGr.children.each((child) => {
-                    child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-                });
+                if (this.stimset == 1) {
+                    this.stimGr.children.each((child) => {
+                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                    });
+                } else if (this.stimset == 2) {
+                    this.stimGrReal.children.each((child) => {
+                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                    });
+                } else if (this.stimset == 3) {
+                    this.stimGrReal2.children.each((child) => {
+                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                    });
+                }
+                
                 
 
                 await this.waitFor(this.timing.iti);
+                this.stopMouseTrack()
                 this.tridx += 1;
 
                 if (this.tridx >= this.notrials - 1) {
@@ -616,16 +913,105 @@
             this.time.delayedCall(duration, resolve);
         });
     }
-*/
+*/  
+
+    startMouseTrack() {
+        // Clear any previous tracking
+        if (this.mouseTrackInterval) {
+            clearInterval(this.mouseTrackInterval);
+        }
+        
+        // Reset mouse tracking storage
+        this.mouseData = [];
+
+        // Start tracking every 50ms
+        this.mouseTrackInterval = setInterval(() => {
+            let time = performance.now(); // High-resolution timestamp
+            let xpos = this.input.activePointer.x;
+            let ypos = this.input.activePointer.y;
+            
+            this.mouseData.push({ time, xpos, ypos });
+        }, 50);
+
+        //console.log(`Started mouse tracking for Trial: ${trialID}, Condition: ${cond_name}`);
+    }
+
+    stopMouseTrack() {
+        if (this.mouseTrackInterval) {
+            clearInterval(this.mouseTrackInterval);
+            this.mouseTrackInterval = null;
+        }
+
+        // Store tracked data in trialData
+        if (this.trialData && this.trialData[this.tridx]) {
+            this.trialData[this.tridx].mouse_time = this.mouseData.map(d => d.time);
+            this.trialData[this.tridx].mouse_xpos = this.mouseData.map(d => d.xpos);
+            this.trialData[this.tridx].mouse_ypos = this.mouseData.map(d => d.ypos);
+        }
+
+        //console.log(`Mouse tracking stopped for Trial: ${trialID}, Condition: ${cond_name}`);
+    }
+
+    decision_trial() {
+        return new Promise((resolve) => { 
+            const centerX = this.cameras.main.centerX;
+            const centerY = this.cameras.main.centerY;
+            this.leftTargetZone = this.add.rectangle(centerX - 100, centerY, 50, 50, 0xffffff, 0)
+                .setOrigin(0.5)
+                .setInteractive();
+
+            this.rightTargetZone = this.add.rectangle(centerX + 100, centerY, 50, 50, 0xffffff, 0)
+                .setOrigin(0.5)
+                .setInteractive();
+
+            
+
+            const handleChoice = (choice) => {
+                this.trialData[this.tridx]["t_ch_choice_made"] = performance.now();
+                // Stop both particle emitters
+                this.target_particles_1.stop();
+                this.target_particles_2.stop();
+            
+                // Hide interactive zones
+                this.leftTargetZone.disableInteractive();
+                this.rightTargetZone.disableInteractive();
+            
+                // Save the choice
+                this.trialData[this.tridx].choice = choice; // 1 = left, 2 = right
+            
+                // Determine outcome
+                let outcomeText = (choice === 1) ? this.trialData[this.tridx].t1_ev : this.trialData[this.tridx].t2_ev;
+                let outcomeX = (choice === 1) ? centerX - 100 : centerX + 100;
+            
+                // Show outcome at the chosen target location
+                this.trialData[this.tridx]["t_outcome_txt_shown"] = performance.now();
+                this.showOutcomeText(outcomeText, outcomeX, centerY);
+                resolve()
+            };
+            
+            // Click events
+            this.leftTargetZone.once('pointerdown', () => handleChoice(1));
+            this.rightTargetZone.once('pointerdown', () => handleChoice(2));
+
+        
+        })
+    }
+
+
     async showCtxtCues(sequence) {
         for (let i = 0; i < sequence.length; i++) {
             const stimPos = sequence[i];
+            
 
             // Show the stimulus at the current position
+            this.trialData[this.tridx]["t_stim"+(i+1).toString()+"_shown"] = performance.now();
             this.showStimulus(stimPos);
 
             // Extend the line from the stimulus to the center and draw the circle
             await this.extendLineAndDrawCircle(stimPos, i);
+            this.trialData[this.tridx]["t_stim"+(i+1).toString()+"_spark_arrived"] = performance.now();
+            console.log("timing_recorded")
+            console.log(this.trialData[this.tridx])
 
             // Optionally, wait for the duration of the stimulus (ctx_cue_dur)
             await this.waitFor(this.timing.ctx_cue_dur);
@@ -655,6 +1041,8 @@
         })
     }
 
+
+
 showStimulus(stpos) {
     console.log(`St pos ${stpos}`);
     console.log(`Showing stimulus at position ${stpos}`);
@@ -663,6 +1051,9 @@ showStimulus(stpos) {
         group = this.stimGr
     } else if (this.stimset == 2) {
         group =this.stimGrReal
+
+    } else if (this.stimset == 3) {
+        group =this.stimGrReal2
 
     }
 
@@ -774,7 +1165,20 @@ extendLineAndDrawCircle(stimPos, sidx) {
         const centerY = this.cameras.main.centerY;
 
         // Get the stimulus position
-        const stim = this.stimGr.getChildren()[stimPos];
+        console.log("Stimset:"+  this.stimset)
+        let stim =1
+        if (this.stimset == 1) {
+            console.log("In stimset 1")
+            stim = this.stimGr.getChildren()[stimPos];
+        } else if (this.stimset == 2) {
+            console.log("In stimset 2")
+            stim = this.stimGrReal.getChildren()[stimPos];
+
+        } else if (this.stimset == 3) {
+            console.log("In stimset 3")
+            stim = this.stimGrReal2.getChildren()[stimPos];
+
+        }
         const stimX = stim.x;
         const stimY = stim.y;
 
