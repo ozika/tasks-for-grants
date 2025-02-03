@@ -289,7 +289,9 @@ class BaseScene extends Phaser.Scene {
                 fontSize: '14px',
                 color: "#16a085"
             });
-            this.trialData[this.tridx]["t_slider_shown"] = performance.now();
+            if (!this.scene.isActive('IntroScene') == true) {
+                this.trialData[this.tridx]["t_slider_shown"] = performance.now();
+            }
             // ["#8e44ad", "#16a085"]
             // Drag functionality for the slider handle
             this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
