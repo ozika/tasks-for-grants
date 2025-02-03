@@ -489,9 +489,8 @@ class IntroScene extends BaseScene {
                     this.waitFor(200);
                     // Remove both buttons
                     this.intromusic = this.sound.add('intromusic', {volume: 1});
-                    if (this.intromusic.isPlaying) {
-                        this.intromusic.stop();
-                    }
+                    this.sound.stopAll();
+
                     this.intromusic.play();
                     this.waitFor(500);
                     continueButton.destroy();
