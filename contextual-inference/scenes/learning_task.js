@@ -339,7 +339,7 @@
 
 
         // SHARP START
-        this.lvl1music = this.sound.add('lvl1', {volume: 1, loop: true});
+        this.lvl1music = this.sound.add('lvl1', {volume: 0.8, loop: true});
         if (this.lvl1music.isPlaying) {
             this.lvl1music.stop();
         }
@@ -419,7 +419,18 @@
                     //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
                     await this.waitFor(100); 
                 }
+
+
+                this.lvl1music.stop();
+                this.tweens.add({
+                    targets: this.lvl1music,
+                    volume: 0.8,
+                    duration: 2000 // Original duration
+                });
+
                 this.lvl1music.play();
+
+
                 this.waitFor(3000)
                 await this.runTrials(cond[1]);
 
@@ -449,6 +460,7 @@
 
         }
         
+        this.lvl1music.stop();
 
         // Change alpha back to baseline
         this.stimGr.children.each((child) => {
@@ -462,11 +474,13 @@
         await this.showInstructionButtons('instr_1_2b4', 1, true);
         //await this.waitFor(4000)
 
-        for (let i = 0; i < 6; i++) { 
-            this.stimGrReal.getChildren()[i].alpha=0.5;
-            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
-            await this.waitFor(200); 
-        }
+        //for (let i = 0; i < 6; i++) { 
+        //    this.stimGrReal.getChildren()[i].alpha=0.5;
+        ///    //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+        //    await this.waitFor(200); 
+       // }
+
+        this.flashStimuli(this.stimGrReal);
 
         await this.showInstructionButtons('instr_1_3', 1, true);
 
@@ -478,9 +492,9 @@
         }
         this.lvl2music.play();
 
-        
+        await this.waitFor(1000)
         for (let i = 0; i < 6; i++) { 
-            this.stimGrReal.getChildren()[i].alpha=0.1;
+            this.stimGrReal.getChildren()[i].alpha=0.3;
             //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
             await this.waitFor(200); 
         }
@@ -499,7 +513,10 @@
         });
 
         await this.waitFor(2000)
-        await this.showInstructionButtons('instr_2_1', 1, true);
+        let i2_1 = this.sound.add('instr_2_1', {volume: 1});
+        i2_1.play();
+        await this.waitFor(5500)
+       //await this.showInstructionButtons('instr_2_1', 1, true);
 
         // Collect a click
         //const centerX = this.cameras.main.centerX;
@@ -529,12 +546,14 @@
 
         await this.showInstructionButtons('instr_2_3', 1);
 
-        for (let i = 0; i < 6; i++) { 
-            this.stimGrReal2.getChildren()[i].alpha=0.1;
-            this.stimGrReal2.getChildren()[i].disableInteractive()
+        await this.flashStimuli(this.stimGrReal2);
+
+        //for (let i = 0; i < 6; i++) { 
+         //   this.stimGrReal2.getChildren()[i].alpha=0.1;
+         //   this.stimGrReal2.getChildren()[i].disableInteractive()
             //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
-            await this.waitFor(100); 
-        }
+         //   await this.waitFor(100); 
+        //}
 
         await this.waitFor(1000); 
         // RUN next barch of 
@@ -561,7 +580,8 @@
         //const centerX = this.cameras.main.centerX;
         //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
 
-        
+        i2_1.play();
+        await this.waitFor(5500)
         let post_rating2 = await this.getStimClicks() 
 
         this.blinkStars(5000)
@@ -609,7 +629,49 @@
     }
 
     
-
+    flashStimuli(group) {
+        group.getChildren().forEach((stim, i) => {
+            // Step 1: Light up to alpha = 1
+            this.tweens.add({
+                targets: stim,
+                alpha: 1,
+                duration: 500, // Quick increase
+                ease: 'Cubic.easeOut',
+                onComplete: () => {
+                    // Step 2: Create blue particle effect behind the stimulus
+                    const blinkParticles = this.add.particles(stim.x, stim.y, 'flares', {
+                        frame: ['blue'], // Blue particle effect
+                        lifespan: 500, // Particles last for 500ms
+                        speed: 100,
+                        quantity: 10,
+                        scale: { start: 0.2, end: 0 },
+                        blendMode: 'SCREEN',
+                    });
+        
+                    blinkParticles.setDepth(-1); // Move the particles behind the stimuli
+                    blinkParticles.start();
+        
+                    // Stop particle emission after 30ms (quick flash)
+                    this.time.delayedCall(30, () => {
+                        blinkParticles.stop();
+                    });
+        
+                    // Remove the particles after their lifespan ends
+                    this.time.delayedCall(500, () => {
+                        blinkParticles.destroy(); // Destroy particles after their effect is done
+        
+                        // Step 3: Fade to alpha = 0.2
+                        this.tweens.add({
+                            targets: stim,
+                            alpha: 0.2,
+                            duration: 3000,
+                            ease: 'Cubic.easeIn',
+                        });
+                    });
+                }
+            });
+        });
+    }
     // Start trial and process stimuli sequence
     async runTrials(conf) {
             

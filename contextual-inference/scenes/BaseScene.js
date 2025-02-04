@@ -258,89 +258,93 @@ class BaseScene extends Phaser.Scene {
 
     createSlider() {
         return new Promise((resolve) => {
-
             const sliderWidth = 300; // Scale width in pixels
             const sliderHeight = 10; // Scale height
-
+    
             const centerX = this.cameras.main.centerX;
             const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
-
+    
+            // Scale line (clickable)
             this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
             this.scaleLine.setDisplaySize(sliderWidth, sliderHeight);
-
-            // Add the slider handle
-            this.handle = this.add.sprite(centerX, centerY-15, 'handle').setDisplaySize(30, 30).setInteractive(); 
-
+            this.scaleLine.setInteractive(); // Make scale line clickable
+    
+            // Add the slider handle (invisible at first)
+            this.handle = this.add.sprite(centerX, centerY - 15, 'handle')
+                .setDisplaySize(30, 30)
+                .setInteractive()
+                .setAlpha(0); // Invisible at start
+    
             this.input.setDraggable(this.handle);
-
+    
             // Add text to display the rating above the slider
-            this.ratingText = this.add.text(centerX-150, centerY + 30, 'Expected: 0', {
+            this.ratingText = this.add.text(centerX - 150, centerY + 30, '', {
                 fontSize: '14px',
                 color: "#5dade2"
-            })
-
-            // Add text to display the rating above the slider
-            this.lbl1 = this.add.text(centerX-160, centerY - 25, '-100 MW', {
+            });
+    
+            // Add min/max labels
+            this.lbl1 = this.add.text(centerX - 160, centerY - 25, '-100 MW', {
                 fontSize: '14px',
                 color: "#8e44ad"
             });
-
-            this.lbl2 = this.add.text(centerX+105, centerY - 25, '100 MW', {
+    
+            this.lbl2 = this.add.text(centerX + 105, centerY - 25, '100 MW', {
                 fontSize: '14px',
                 color: "#16a085"
             });
-            if (!this.scene.isActive('IntroScene') == true) {
+    
+            if (!this.scene.isActive('IntroScene')) {
                 this.trialData[this.tridx]["t_slider_shown"] = performance.now();
             }
-            // ["#8e44ad", "#16a085"]
-            // Drag functionality for the slider handle
-            this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+    
+            // Function to update slider position and value
+            const updateSlider = (xPos) => {
+                this.handle.x = Phaser.Math.Clamp(xPos, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
+    
+                // Map position to -100 to 100
+                const normalizedValue = (this.handle.x - (centerX - sliderWidth / 2)) / sliderWidth;
+                const rating = Math.round(normalizedValue * 200 - 100);
+                this.ratingText.setText(`Estimate: ${rating} MW`);
+                this.currentRating = rating;
+            };
+    
+            // Clicking on the scale line makes the handle visible & moves it
+            this.scaleLine.on('pointerdown', (pointer) => {
+                this.handle.setAlpha(1); // Show the handle
+                updateSlider(pointer.x);
+            });
+    
+            // Dragging the handle updates the rating
+            this.input.on('drag', (pointer, gameObject, dragX) => {
                 if (gameObject === this.handle) {
-                    if (!this.scene.isActive('IntroScene') == true) {
+                    if (!this.scene.isActive('IntroScene')) {
                         this.trialData[this.tridx]["t_first_click_on_handle"] = performance.now();
                     }
-                    // Clamp handle position to stay within scale line
-                    gameObject.x = Phaser.Math.Clamp(dragX, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
-
-                    // Map handle position to -100 to 100
-                    //this.currentRating
-                    const normalizedValue = (gameObject.x - (centerX - sliderWidth / 2)) / sliderWidth;
-                    const rating = Math.round(normalizedValue * 200 - 100); // Map to range -100 to 100
-                    this.ratingText.setText(`Estimate: ${rating} MW`);
-                    this.currentRating = rating; // Store the current rating
-
-
+                    updateSlider(dragX);
                 }
             });
-
-            // Add the submit button as an image
-            this.submitButton = this.add.sprite(centerX+50, centerY + 35, 'submit2').setInteractive();
-            this.submitButton.setDisplaySize(40, 40); // Adjust size as needed
-            this.submitButton.preFX.addGlow(0x5dade2)
-
-
+    
+            // Add the submit button
+            this.submitButton = this.add.sprite(centerX + 50, centerY + 35, 'submit2').setInteractive();
+            this.submitButton.setDisplaySize(40, 40);
+            this.submitButton.preFX.addGlow(0x5dade2);
+    
             this.submitButton.on('pointerdown', () => {
-                if (!this.scene.isActive('IntroScene') == true) {
+                if (!this.scene.isActive('IntroScene')) {
                     this.trialData[this.tridx]["t_response_made"] = performance.now();
-                }
-                console.log('Submitted rating:', this.currentRating);
-                //save rating 
-                console.log("Is intro scene:" + (this.scene.isActive('IntroScene') == true))
-                console.log("Is experiment scene:" + (this.scene.isActive('ExperimentScene') == true))
-                if (!this.scene.isActive('IntroScene') == true) {
-                    console.log("Injected rating data")
                     this.trialData[this.tridx].rating = this.currentRating;
                 }
-                
-                this.sliderSubmitted = true; // Signal that the slider input is complete
-                resolve()
-                
+                console.log('Submitted rating:', this.currentRating);
+    
+                this.sliderSubmitted = true;
+                resolve();
             });
-
+    
             // Initialize currentRating
-            this.currentRating = 0; // Default value at the center
+            this.currentRating = 0;
             this.sliderSubmitted = false;
-        })
+        });
     }
 
     waitForSliderInput() {
