@@ -462,7 +462,9 @@ class BaseScene extends Phaser.Scene {
     
         // Wait for the submit button click
         await this.waitForSubmitClick();
-    
+        
+        this.trialData[this.tridx].relevant_chosen = selectedStimuli
+
         console.log(`Player selected stimuli with IDs: ${Array.from(selectedStimuli)}`);
     
         return Array.from(selectedStimuli);
@@ -822,6 +824,12 @@ class BaseScene extends Phaser.Scene {
 
     sendTrialData() {
         const outdata = {partial: false, subid: this.subID+"_"+this.cond_name, data: this.trialData} 
+        this.postData(JSON.stringify(outdata));
+    
+    }
+
+    sendRatingsData(data) {
+        const outdata = {partial: false, subid: this.subID+"_"+this.cond_name+"_ratings", data: data} 
         this.postData(JSON.stringify(outdata));
     
     }

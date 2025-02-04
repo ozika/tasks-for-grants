@@ -526,12 +526,14 @@
         let post_rating = await this.getStimClicks() 
 
         this.blinkStars(5000)
+        let ratings = [{"rated_relevant": post_rating, "no_rated_relevant": post_rating.length, "subID": this.subID, "condition": "main1", "truly_relevant": this.trialData[0].correct_stimuli}]
+        console.log(ratings)
 
-        this.trialData.rated_relevant = post_rating
-        this.trialData.no_rated_relevant = post_rating.length
 
-        console.log("submitted relevant ctxts: " + this.trialData.rated_relevant)
-        console.log("no relevant ctxts: " + this.trialData.no_rated_relevant)
+        this.sendRatingsData(ratings);
+
+        console.log("submitted relevant ctxts: " + ratings.rated_relevant)
+        console.log("no relevant ctxts: " + ratings.no_rated_relevant)
 
         for (let i = 0; i < 6; i++) { 
             this.stimGrReal.getChildren()[i].alpha=0;
@@ -574,7 +576,7 @@
             duration: 2500 // Original duration
         });
         await this.waitFor(2500)
-        await this.showInstructionButtons('instr_2_1', 1, true);
+        //await this.showInstructionButtons('instr_2_1', 1, true);
 
         // Collect a click
         //const centerX = this.cameras.main.centerX;
@@ -585,12 +587,16 @@
         let post_rating2 = await this.getStimClicks() 
 
         this.blinkStars(5000)
+        
 
-        this.trialData.rated_relevant_2 = post_rating2
-        this.trialData.no_rated_relevant_2 = post_rating2.length
+        let ratings2 = [{"rated_relevant": post_rating2, "no_rated_relevant": post_rating2.length, "subID": this.subID, "condition": "main2", "truly_relevant": this.trialData[0].correct_stimuli}]
+        console.log(ratings2)
 
-        console.log("submitted relevant ctxts: " + this.trialData.rated_relevant_2)
-        console.log("no relevant ctxts: " + this.trialData.no_rated_relevant_2)
+        console.log("submitted relevant ctxts: " + ratings2.rated_relevant_2)
+        console.log("no relevant ctxts: " + ratings2.no_rated_relevant_2)
+
+
+        this.sendRatingsData(ratings2);
 
         for (let i = 0; i < 6; i++) { 
             this.stimGrReal2.getChildren()[i].alpha=0;
