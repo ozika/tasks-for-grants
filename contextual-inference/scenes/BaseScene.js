@@ -428,46 +428,97 @@ class BaseScene extends Phaser.Scene {
     }
 
     async getStimClicks() {
+        return new Promise((resolve) => { 
         console.log("inside getStimClicks");
-        const centerX = this.cameras.main.centerX;
-        this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
-        this.subbutton.setDisplaySize(40, 40); // Adjust size as needed
-        this.subbutton.preFX.addGlow(0x5dade2)
-        
-        let selectedStimuli = new Set(); // Store selected stimulus indices
     
-        // Enable interactivity for all sprites
-        let group = 1
-        if (this.stimset==2) {
-                group =this.stimGrReal
-        } else if (this.stimset==3) {
-                group =this.stimGrReal2
-
-        }
-
+        var ingr = this.add.text(400, 300, 'Select all ingredients that you think interacted\n with the particle.\n\n\n (click on as many as you want and then click submit)', {
+            fontSize: '20px',
+            fontFamily: 'Arial',
+            color: '#48e0fc',
+            align: 'center'
+        }).setOrigin(0.5);
+    
+        const centerX = this.cameras.main.centerX;
+        this.subbutton = this.add.sprite(centerX, 530, 'submit2').setOrigin(0.5).setInteractive();
+        this.subbutton.setDisplaySize(40, 40);
+        this.subbutton.setAlpha(0.2); // Initially low visibility
+        this.subbutton.preFX.addGlow(0x808080); // Gray taint
+    
+        let confirmText = null;
+        let firstClick = false;
+    
+        let selectedStimuli = new Set();
+        let group = this.stimset == 2 ? this.stimGrReal : this.stimset == 3 ? this.stimGrReal2 : 1;
+    
+        const resetSubmitButton = () => {
+            firstClick = false;
+            if (confirmText) {
+                confirmText.destroy();
+                confirmText = null;
+            }
+        };
+    
         group.children.each((sprite, index) => {
             sprite.setInteractive();
-            sprite.setAlpha(0.1); // Default low alpha
+            sprite.setAlpha(1); // Default full opacity
     
             sprite.on('pointerdown', () => {
                 if (selectedStimuli.has(index)) {
                     selectedStimuli.delete(index);
-                    sprite.setAlpha(0.1); // Deselect
+                    sprite.setAlpha(1); // Reset to normal appearance
+                    sprite.preFX?.clear(); // Remove glow effect
                 } else {
                     selectedStimuli.add(index);
-                    sprite.setAlpha(1); // Select
+                    sprite.preFX?.clear();
+                    sprite.preFX?.addGlow(0x48e0fc, 5, 2, false);
                 }
+    
+                // Update submit button opacity based on selections
+                if (selectedStimuli.size > 0) {
+                    this.subbutton.setAlpha(1);
+                    this.subbutton.preFX.clear();
+                    this.subbutton.preFX.addGlow(0x5dade2);
+                } else {
+                    this.subbutton.setAlpha(0.2);
+                    this.subbutton.preFX.clear();
+                    this.subbutton.preFX.addGlow(0x808080);
+                }
+    
+                // If they modify selection after clicking submit, reset confirmation
+                resetSubmitButton();
             });
         });
     
-        // Wait for the submit button click
-        await this.waitForSubmitClick();
-        
-        this.trialData[this.tridx].relevant_chosen = selectedStimuli
-
-        console.log(`Player selected stimuli with IDs: ${Array.from(selectedStimuli)}`);
+        // Handle submit button clicks
+        this.subbutton.on('pointerdown', async () => {
+            if (!firstClick) {
+                firstClick = true;
     
-        return Array.from(selectedStimuli);
+                // Display confirmation text next to the button
+                if (!confirmText) {
+                    confirmText = this.add.text(this.subbutton.x + 50, this.subbutton.y, 'Click again to confirm', {
+                        fontSize: '18px',
+                        fontFamily: 'Arial',
+                        color: '#48e0fc',
+                        align: 'left'
+                    }).setOrigin(0, 0.5);
+                }
+            } else {
+                // Second click confirms selection
+                if (confirmText) confirmText.destroy();
+                this.subbutton.destroy()
+    
+                this.trialData[this.tridx].relevant_chosen = selectedStimuli;
+                console.log(`Player selected stimuli with IDs: ${Array.from(selectedStimuli)}`);
+                ingr.destroy();
+        
+                resolve(Array.from(selectedStimuli));
+            }
+        });
+    
+        // Wait for the submit button click (the function will only proceed after the second click)
+        //await this.waitForSubmitClick();
+    })
     }
     
     async waitForSubmitClick() {

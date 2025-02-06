@@ -52,8 +52,8 @@
 
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
-        this.load.audio('lvl2', 'assets/sound/soundtrack/game_music6.mp3');
-        this.load.audio('lvl3', 'assets/sound/soundtrack/game_music7.mp3');
+        this.load.audio('lvl2', 'assets/sound/soundtrack/chapter1_playlist.mp3');
+        this.load.audio('lvl3', 'assets/sound/soundtrack/chapter2_playlist.mp3');
         this.load.audio('final_music', 'assets/sound/soundtrack/quirky_game_music.mp3');
 
         this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
@@ -102,6 +102,8 @@
         this.cfg.ctx_alpha_baseline = 0.1
         this.cfg.ctx_alpha_peak = 1
         this.cfg.tar_alpha_baseline = 0.1
+
+        this.cfg.music_vol = 0.7
 
         this.cfg.evee_volume = 1
 
@@ -486,7 +488,7 @@
 
 
         // SHARP START
-        this.lvl2music = this.sound.add('lvl2', {volume: 1, loop: true});
+        this.lvl2music = this.sound.add('lvl2', {volume: this.cfg.music_vol, loop: true});
         if (this.lvl2music.isPlaying) {
             this.lvl2music.stop();
         }
@@ -559,7 +561,7 @@
 
         await this.waitFor(1000); 
         // RUN next barch of 
-        this.lvl3music = this.sound.add('lvl3', {volume: 1, loop: true});
+        this.lvl3music = this.sound.add('lvl3', {volume: this.cfg.music_vol, loop: true});
         if (this.lvl3music.isPlaying) {
             this.lvl3music.stop();
         }
