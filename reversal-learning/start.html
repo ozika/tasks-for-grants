@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Probabilistic Learning Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.85.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="ProbabilisticTaskScene.js?r=123"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0; /* Light gray */
+            color: #9FE2BF;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 600px;
+            margin: 40px auto; /* Center horizontally with spacing */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+            background-color: #e0e0e0;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            backgroundColor: '#e0e0e0', // light gray background
+            parent: 'game-container',
+            scene: [ProbabilisticTaskScene]
+        };
+
+        new Phaser.Game(config);
+    </script>
+</body>
+</html>
