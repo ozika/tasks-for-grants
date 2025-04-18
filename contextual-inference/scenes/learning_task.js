@@ -3,7 +3,14 @@
     constructor() {
         super('ExperimentScene');
     }
-    
+
+    init(data) {
+        this.m1 = data.m1;
+        this.m2 = data.m2;
+        this.m3 = data.m3;
+        this.schid = data.schid;
+        
+    }
     
     preload() {
         // Preload assets
@@ -48,12 +55,16 @@
         this.load.audio('instr_3_2_mostly', 'assets/sound/instructions/instr_3_2_mostly.wav');
         this.load.audio('instr_3_2_wrong', 'assets/sound/instructions/instr_3_2_wrong.wav');
         this.load.audio('instr_3_3', 'assets/sound/instructions/instr_3_3.wav');
+        this.load.audio('instr_4_1', 'assets/sound/instructions/instr_4_1.wav');
+        this.load.audio('instr_mf', 'assets/sound/instructions/instr_mf.wav');
+        
 
 
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
         this.load.audio('lvl2', 'assets/sound/soundtrack/chapter1_playlist.mp3');
         this.load.audio('lvl3', 'assets/sound/soundtrack/chapter2_playlist.mp3');
+        this.load.audio('lvl4', 'assets/sound/soundtrack/chapter2_playlist.mp3');
         this.load.audio('final_music', 'assets/sound/soundtrack/quirky_game_music.mp3');
 
         this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
@@ -84,6 +95,14 @@
         this.load.image('realstim25', 'assets/frost.png');
         this.load.image('realstim26', 'assets/soil.png');
 
+        this.load.image('realstim31', 'assets/salt.png');
+        this.load.image('realstim32', 'assets/brw.png');
+        this.load.image('realstim33', 'assets/ice.png');
+        this.load.image('realstim34', 'assets/sun.png');
+        this.load.image('realstim35', 'assets/leaf.png');
+        this.load.image('realstim36', 'assets/herb.png');
+
+        
         this.load.image('handle', 'assets/gps.png');
         this.load.image('outcm-handle', 'assets/gps2.png');
 
@@ -93,9 +112,8 @@
     }
 
     create() {
-        
-        this.schid = schid
-        this.m2 = m2
+        console.log("m1:", this.m1, "m2:", this.m2, "m3:", this.m3);
+        //this.m2 = m2
         this.flag=flag
         this.stimset = 1
         this.cfg =[] 
@@ -115,7 +133,7 @@
         this.enloss = this.sound.add('enloss', {volume: 0.5});
 
         this.centerX = this.cameras.main.centerX;
-        this.centerY = this.cameras.main.centerY;
+        this.centerY = this.cameras.main.centerY -text_panel_h/2;
 
         // Background setup
         this.add.image(400, 300, 'space').setDisplaySize(800, 600).setDepth(-2);
@@ -268,6 +286,7 @@
         this.stimGr = this.add.group(); // Create a group
         this.stimGrReal = this.add.group(); // Create a group
         this.stimGrReal2 = this.add.group(); // Create a group
+        this.stimGrReal3 = this.add.group(); // Create a group
         const jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0];
      
         // Add 6 images at 60-degree increments
@@ -275,8 +294,9 @@
         //var jar_colors = [0xd7bde2, 0xfadbd8, 0xd5f5e3, 0xfcf3cf, 0xd6eaf8, 0xfdebd0]
         for (let i = 0; i < 6; i++) {
             let angle = Phaser.Math.DegToRad(i * 60); // Convert degrees to radians
-            let x = cX + r * Math.cos(angle);
-            let y = cY + r * Math.sin(angle);
+
+            let x = this.cameras.main.centerX + r * Math.cos(angle);
+            let y = (this.cameras.main.centerY - text_panel_h/2) + r * Math.sin(angle);
 
             // Create an image and add it to the group
             //let image = this.add.image(x, y, 'stim' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y);
@@ -297,6 +317,12 @@
             sti2.postFX.addGlow(0x283747, 4, 0);
             // blue 0xaeb6bf
             this.stimGrReal2.add(sti2);
+
+            let sti3 = this.add.sprite(x, y, 'realstim3' + (i + 1)).setDisplaySize(stim_dim_x, stim_dim_y); 
+            sti3.setAlpha(0);
+            sti3.postFX.addGlow(0x283747, 4, 0);
+            // blue 0xaeb6bf
+            this.stimGrReal3.add(sti3);
 
 
         }
@@ -338,7 +364,7 @@
     }
 
     async runTask() {
-
+        await this.fetchSubtitleScript("script.csv");
 
         // SHARP START
         this.lvl1music = this.sound.add('lvl1', {volume: 0.8, loop: true});
@@ -354,10 +380,12 @@
 
         let cond = [];
         //cond[0] = { name: "train1", rel: "1" }; // make sure this is obvious like +20 -25
-        cond[0] = { name: "train", rel: "1"};
-        cond[1] = { name: "train", rel: "1" };
-        cond[2] = { name: "main1", rel: "3" };
-        cond[3] = { name: "main2", rel: this.m2.toString() };
+        cond[0] = { name: "train", flag:"", rel: "1"};
+        cond[1] = { name: "train", flag:"", rel: "1" };
+        cond[2] = { name: "main", bl:"1", flag:"", rel: this.m1.toString() };
+        cond[3] = { name: "main", bl:"2", flag:"", rel: this.m2.toString() };
+        cond[4] = { name: "main", bl:"3", flag:"", rel: this.m3.toString() };
+        cond[5] = { name: "main", bl:"3", flag:"_extra", rel: this.m3.toString() };
 
         this.first_decision_made = 0
 
@@ -518,12 +546,6 @@
         let i2_1 = this.sound.add('instr_2_1', {volume: 1});
         i2_1.play();
         await this.waitFor(5500)
-       //await this.showInstructionButtons('instr_2_1', 1, true);
-
-        // Collect a click
-        //const centerX = this.cameras.main.centerX;
-        //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
-
         
         let post_rating = await this.getStimClicks() 
 
@@ -605,14 +627,78 @@
             this.stimGrReal2.getChildren()[i].disableInteractive()
         }
 
-        this.blinkStars(10000);
+        this.blinkStars(5000);
+
+
+        await this.showInstructionButtons('instr_3_1', 1);
+
+        await this.showInstructionButtons('instr_4_1', 1);
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal3.getChildren()[i].alpha=0.2;
+            //this.stimGrReal3.getChildren()[i].disableInteractive()
+            //this.stimGr.getChildren()[i].setGlow(0x85c1e9)
+            await this.waitFor(50); 
+        }
+
+        await this.flashStimuli(this.stimGrReal3);
+
+
+        ///Run main3 here
+        this.lvl4music = this.sound.add('lvl4', {volume: this.cfg.music_vol, loop: true});
+        if (this.lvl4music.isPlaying) {
+            this.lvl4music.stop();
+        }
+        this.lvl4music.play();
+        await this.waitFor(5000);
+
+        this.stimset = 4
+        await this.runTrials(cond[4]);
+        //take the volume down
+        this.tweens.add({
+            targets: this.lvl4music,
+            volume: 0,
+            duration: 2500 // Original duration
+        });
+        await this.waitFor(1500)
+
+        await this.showInstructionButtons('instr_mf', 1);
+
+        this.tweens.add({
+            targets: this.lvl4music,
+            volume: this.cfg.music_vol,
+            duration: 2500 // Original duration
+        });
+        await this.runTrials(cond[5]);
+
+        i2_1.play();
+        await this.waitFor(5500)
+        let post_rating3 = await this.getStimClicks() 
+
+        this.blinkStars(5000)
+        
+
+        let ratings3 = [{"rated_relevant": post_rating3, "no_rated_relevant": post_rating3.length, "subID": this.subID, "condition": "main3", "truly_relevant": this.trialData[0].correct_stimuli}]
+        console.log(ratings3)
+
+        console.log("submitted relevant ctxts: " + ratings2.rated_relevant_2)
+        console.log("no relevant ctxts: " + ratings2.no_rated_relevant_2)
+
+
+        this.sendRatingsData(ratings3);
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGrReal2.getChildren()[i].alpha=0;
+            this.stimGrReal2.getChildren()[i].disableInteractive()
+        }
+
+        this.blinkStars(5000);
         this.spark.start()
         await this.moveAndShowEvee(400, 300, 200, true);
         this.waitFor(1000)
         this.createGentleMotion()
 
-        await this.showInstructionButtons('instr_3_1', 1);
-
+        // calcualte average accuracy
         await this.showInstructionButtons('instr_3_2_mostly', 1);
 
         await this.showInstructionButtons('instr_3_3', 1);
@@ -684,8 +770,8 @@
     async runTrials(conf) {
             
             
-            var cond_name = "r"+conf.rel +"_"+conf.name+"_"+this.schid.toString()+this.flag
-            this.cond_name = cond_name
+            var cond_name = "r"+conf.rel +"_"+conf.name+"_"+this.schid.toString()+conf.flag+this.flag
+            this.cond_name = "r"+conf.rel +"_"+conf.name+conf.bl+"_"+this.schid.toString()+conf.flag+this.flag
             await this.fetchData("sch_"+cond_name+".csv")
 
 
@@ -868,8 +954,12 @@
                     this.stimGrReal2.children.each((child) => {
                         child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
                     });
+                } else if (this.stimset == 4) {
+                    this.stimGrReal3.children.each((child) => {
+                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
+                    });
                 }
-                
+                 
                 
 
                 await this.waitFor(this.timing.iti);
@@ -1025,7 +1115,7 @@
     decision_trial() {
         return new Promise((resolve) => { 
             const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY;
+            const centerY = this.cameras.main.centerY -text_panel_h/2;
             this.leftTargetZone = this.add.rectangle(centerX - 100, centerY, 50, 50, 0xffffff, 0)
                 .setOrigin(0.5)
                 .setInteractive();
@@ -1124,6 +1214,9 @@ showStimulus(stpos) {
 
     } else if (this.stimset == 3) {
         group =this.stimGrReal2
+
+    } else if (this.stimset == 4) {
+        group =this.stimGrReal3
 
     }
 
@@ -1232,7 +1325,7 @@ extendLineAndDrawCircle(stimPos, sidx) {
     return new Promise((resolve) => {
         this.sparksound.play();
         const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
+        const centerY = this.cameras.main.centerY -text_panel_h/2;
 
         // Get the stimulus position
         console.log("Stimset:"+  this.stimset)
@@ -1247,6 +1340,10 @@ extendLineAndDrawCircle(stimPos, sidx) {
         } else if (this.stimset == 3) {
             console.log("In stimset 3")
             stim = this.stimGrReal2.getChildren()[stimPos];
+
+        } else if (this.stimset == 4) {
+            console.log("In stimset 4")
+            stim = this.stimGrReal3.getChildren()[stimPos];
 
         }
         const stimX = stim.x;

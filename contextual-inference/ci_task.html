@@ -47,8 +47,8 @@
 
         // Get the 'id' parameter from the URL
         const idValue = params.get("id");
-        var m2 = parseInt(idValue.charAt(3), 10);  // Second character 2 OR 4
-        var schid = parseInt(idValue.charAt(idValue.length - 1), 10);  // Last character 0 to 4
+        //var m2 = parseInt(idValue.charAt(3), 10);  // Second character 2 OR 4
+        //var schid = parseInt(idValue.charAt(idValue.length - 1), 10);  // Last character 0 to 4
 
 
         
@@ -62,15 +62,16 @@
         var rectWidth = 80
         var rectHeight = 80
 
-        var cX = 400
-        var cY = 300    
+        var width = 800
+        var height = 600
+        var text_panel_h = 100    
         var r = 200
 
         var trialData
         var seq, td
 
         var targets, t1, t2
-        var flag = ""
+        var flag = "_test"
 
         // INTRO SCENE
         
@@ -79,17 +80,16 @@
 
         const config = {
             type: Phaser.AUTO,
-            width: 800,
-            height: 600,
+            width: width,
+            height: height + text_panel_h,
             parent: 'game-container', // Phaser will append the canvas here
             scale: {
-                mode: Phaser.Scale.FIT, // Automatically resize to fit screen
-                autoCenter: Phaser.Scale.CENTER_BOTH // Center the canvas
+                mode: Phaser.Scale.NONE, // Keep fixed size, no resizing
+                autoCenter: Phaser.Scale.CENTER_BOTH // Center it on the page
             },
-            backgroundColor: '#2c3e50',
+            backgroundColor: '#04365d',
             scene: [IntroScene, ExperimentScene]
             //scene: [ExperimentScene]
-            //scene: [TemplateScene]
         };
 
         const game = new Phaser.Game(config);

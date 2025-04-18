@@ -109,13 +109,16 @@ class IntroScene extends BaseScene {
             gradientTexture.refresh();
         }
 
+        
+
         this.showIntro()
 
     }
 
     async showIntro() {
 
-        
+        //Get instructions from csv 
+        await this.fetchSubtitleScript("script.csv");
         
         if (this.scene.isActive('ExperimentScene')) {
             console.log('ExperimentScene is currently active.');
@@ -164,7 +167,14 @@ class IntroScene extends BaseScene {
 
         await this.moveAndShowEvee(400, 300, 1200);
         
+
+        //this.temp_txt = this.showSubtitle('instr4');
         await this.showInstructionButtons('instr4', 1);
+        //this.temp_txt.destroy();
+
+        // randomize selection of schedule
+        await this.moveAndShowEvee(400, 100, 1600);
+        await this.condSelectionPhase();
 
         this.tweens.add({
             targets:  this.intromusic,
@@ -251,9 +261,21 @@ class IntroScene extends BaseScene {
 
         await this.makeEvePuff()
         await this.moveAndShowEvee(100, 200, 1600);
-        //await this.showInstructionButtons('instr9', 1);
+        await this.showInstructionButtons('instr9', 1);
 
-        //await this.makeEvePuff()
+
+        for (let i = 0; i < 6; i++) { 
+            this.stimGr.getChildren()[i].alpha=0;
+            //await this.waitFor(0); 
+        }
+
+
+        await this.moveAndShowEvee(100, 100, 1600);
+        const schemeImage = this.add.image(400, 300, 'scheme').setOrigin(0.5);
+        await this.showInstructionButtons('instr_struct', 1);
+        schemeImage.destroy(0)
+
+        await this.makeEvePuff()
         await this.showInstructionButtons('instr10', 1);
 
         await this.makeEvePuff(2, 300)
@@ -410,7 +432,12 @@ class IntroScene extends BaseScene {
         // Move to ExperimentScene on "Spacebar" key press
         
                     
-        this.scene.start('ExperimentScene');
+        this.scene.start('ExperimentScene', {
+            m1: this.m1,
+            m2: this.m2,
+            m3: this.m3,
+            schid: this.schid
+        });
         
         this.spark.destroy(); // Destroy the spark particle
 
@@ -466,6 +493,7 @@ class IntroScene extends BaseScene {
         });
     }
 
+    
     veryStart() {
         return new Promise((resolve) => {
             const continueButton = this.add.sprite(400, 300, 'submit2').setInteractive();

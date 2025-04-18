@@ -3,6 +3,12 @@ class BaseScene extends Phaser.Scene {
         super(key);
     }
     
+    init() {
+        this.subtitleMap = {};
+        this.width = width;
+        this.height = height;
+    }
+
 
     preload() {
         // Preload assets
@@ -12,6 +18,7 @@ class BaseScene extends Phaser.Scene {
         this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
         this.load.audio('instr3', 'assets/sound/instructions/instr3.wav');
         this.load.audio('instr4', 'assets/sound/instructions/instr4.wav');
+        this.load.audio('instr4b', 'assets/sound/instructions/instr4b.wav');
         this.load.audio('instr5', 'assets/sound/instructions/instr5.wav');
         this.load.audio('instr6', 'assets/sound/instructions/instr6.wav');
         this.load.audio('instr7', 'assets/sound/instructions/instr7.wav');
@@ -28,6 +35,7 @@ class BaseScene extends Phaser.Scene {
         this.load.audio('instr15', 'assets/sound/instructions/instr15.wav');
         this.load.audio('instr16', 'assets/sound/instructions/instr16.wav');
         this.load.audio('instr3a', 'assets/sound/instructions/instr3a.wav');
+        this.load.audio('instr_struct', 'assets/sound/instructions/instr_struct.wav');
         this.load.audio('instr3b', 'assets/sound/instructions/instr3b.wav');
         this.load.audio('intromusic', 'assets/sound/soundtrack/space_music1.mp3');
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
@@ -37,6 +45,7 @@ class BaseScene extends Phaser.Scene {
         this.load.audio('particle', 'assets/sound/effects/particle.wav');
         this.load.audio('engain', 'assets/sound/effects/energygain2.wav');
         this.load.audio('enloss', 'assets/sound/effects/energyloss.wav');
+        
 
         this.load.image('stim1', 'assets/potion.png');
         this.load.image('stim2', 'assets/starfish.png');
@@ -46,13 +55,50 @@ class BaseScene extends Phaser.Scene {
         this.load.image('stim6', 'assets/letax.png');
         this.load.image('handle', 'assets/gps.png');
         this.load.image('outcm-handle', 'assets/gps2.png');
+        this.load.image('scheme', 'assets/scheme.png');
+
+        //this.load.text('subtitle_script', 'assets/script/script.csv');
     }
+
+    
 
     function_test() {
         console.log("Shared function called from", this.scene.key);
     }
 
-    
+    fetchSubtitleScript(script_name) {
+        return new Promise((resolve) => {
+            console.log("Fetching script from: assets/script/" + script_name);
+            fetch('assets/script/' + script_name)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    try {
+                        const parsed = Papa.parse(text, { header: true });
+                        console.log(parsed);
+                        this.subtitleMap = {};
+                        parsed.data.forEach(row => {
+                            if (row.code && row.Text_visual) {
+                                this.subtitleMap[row.code.trim()] = row.Text_visual.trim();
+                            }
+                        });
+                        console.log(this.subtitleMap);
+                        console.log('Subtitle script successfully loaded.');
+                        resolve();
+                    } catch (parseError) {
+                        console.error('Error parsing subtitle CSV:', parseError);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching subtitle script:', error);
+                });
+        });
+    }
+
     fetchData(schedule_name) {
         return new Promise((resolve) => {
             console.log("fetching "+ "schedules/"+schedule_name)
@@ -96,6 +142,52 @@ class BaseScene extends Phaser.Scene {
 
     }
 
+    
+    // Add this new method inside the IntroScene class:
+    condSelectionPhase() {
+        return new Promise((resolve) => {
+            const centerX = this.cameras.main.centerX;
+            const centerY = this.cameras.main.centerY - text_panel_h / 2;
+            const spacing = 70;
+            const startX = centerX - (spacing * 2.5);
+            const squareSize = 50;
+
+            const squareGroup = this.add.group();
+
+            // Play audio instruction
+            this.temp_txt = this.showSubtitle('instr4b');
+            const audio = this.sound.add('instr4b');
+            audio.play();
+
+            for (let i = 0; i < 6; i++) {
+                const square = this.add.rectangle(startX + spacing * i, centerY, squareSize, squareSize, 0xffffff)
+                    .setInteractive();
+
+                squareGroup.add(square);
+
+                square.on('pointerdown', () => {
+                    this.cond_idx = i;
+                    squareGroup.clear(true, true); // destroy all squares
+
+                    // Schedule options
+                    const options = ["234", "243", "324", "342", "423", "432"];
+                    Phaser.Utils.Array.Shuffle(options);
+                    const schval = options[i];
+
+                    this.m1 = parseInt(schval[0]);
+                    this.m2 = parseInt(schval[1]);
+                    this.m3 = parseInt(schval[2]);
+                    this.schid = Phaser.Math.Between(1, 5);
+                    this.temp_txt.destroy()
+
+                    console.log("Schedule chosen:", schval, "-> m1:", this.m1, "m2:", this.m2, "m3:", this.m3, "schid:", this.schid);
+
+                    resolve();
+                });
+            }
+        });
+    }
+
     showStimuli() {
         const centerX = 400; // Center of the scene
         const centerY = 300; // Center of the scene
@@ -132,12 +224,34 @@ class BaseScene extends Phaser.Scene {
     }
 
 
+    showSubtitle(code) {
+        console.log("inside showSubtitle")
+        const subtitle = this.subtitleMap?.[code] || '';
+        //console.log(subtitle);
+        if (!subtitle) {
+            console.warn(`Subtitle for code "${code}" not found.`);
+            return null;
+        }
+    
+        const subtitleText = this.add.text(400, 650, subtitle, {
+            fontSize: '16px',
+            fontFamily: 'Arial',
+            color: '#FFFFFF',
+            align: 'center',
+            wordWrap: { width: 780 }
+        }).setOrigin(0.5);
+    
+        return subtitleText;
+    }
+
     pingSparkles(stimPos, sidx) {
         return new Promise((resolve) => {
             
             this.sparksound.play();
             const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY;
+            const centerY = this.cameras.main.centerY-text_panel_h/2;
+            //console.log("in pingSprkles(), centerX: "+centerX)
+            //console.log("in pingSprkles(), centerY: "+centerY)
 
             // Get the stimulus position
             const stim = this.stimGr.getChildren()[stimPos];
@@ -212,7 +326,7 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
-    animateCosmicParticle(target=0, x0=this.cameras.main.centerX, y0=0, xend=this.cameras.main.centerX, yend=this.cameras.main.centerY) {
+    animateCosmicParticle(target=0, x0=this.cameras.main.centerX, y0=0, xend=this.cameras.main.centerX, yend=this.cameras.main.centerY-text_panel_h/2) {
         return new Promise((resolve) => {
             this.particlesound.play();
             // Get the target index and corresponding color
@@ -262,7 +376,7 @@ class BaseScene extends Phaser.Scene {
             const sliderHeight = 10; // Scale height
     
             const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY + 200; // Position slightly below the target
+            const centerY = this.cameras.main.centerY - text_panel_h/2 + 200; // Position slightly below the target
     
             // Scale line (clickable)
             this.scaleLine = this.add.image(centerX, centerY, 'gradient').setOrigin(0.5, 0.5);
@@ -362,7 +476,7 @@ class BaseScene extends Phaser.Scene {
 
     // Helper to remove all slider components
     removeSlider() {
-        console.log("inside remove slider")
+        //console.log("inside remove slider")
         this.scaleLine.destroy();
         this.handle.destroy();
         this.ratingText.destroy();
@@ -372,7 +486,7 @@ class BaseScene extends Phaser.Scene {
     }
 
     async getStimClick() {
-        console.log("inside getStimClick")
+        //console.log("inside getStimClick")
         // Enable interactivity for all sprites
         this.stimGr.children.each((sprite) => {
             sprite.setInteractive();
@@ -448,7 +562,7 @@ class BaseScene extends Phaser.Scene {
         let firstClick = false;
     
         let selectedStimuli = new Set();
-        let group = this.stimset == 2 ? this.stimGrReal : this.stimset == 3 ? this.stimGrReal2 : 1;
+        let group = this.stimset == 2 ? this.stimGrReal : this.stimset == 3 ? this.stimGrReal2 : this.stimset == 4 ? this.stimGrReal3 : 1;
     
         const resetSubmitButton = () => {
             firstClick = false;
@@ -534,7 +648,7 @@ class BaseScene extends Phaser.Scene {
         return new Promise((resolve) => {
             console.log("inside showOutcomeMarker ")
             const centerX = this.cameras.main.centerX;
-            const centerY = this.cameras.main.centerY + 200;
+            const centerY = this.cameras.main.centerY -text_panel_h/2 + 200;
 
             // Determine glow color based on the outcome
             const glowHexColor = outcome > 0 ? '#16a085': '#8e44ad';
@@ -570,7 +684,7 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
-    showOutcomeText(outcome, x=this.cameras.main.centerX, y=this.cameras.main.centerY) {
+    showOutcomeText(outcome, x=this.cameras.main.centerX, y=this.cameras.main.centerY -text_panel_h/2) {
         return new Promise((resolve) => {
             const glowHexColor = outcome > 0 ? '#16a085' : '#8e44ad';
             const txtColor = outcome > 0 ? '#a3e4d7' : '#d7bde2';
@@ -809,65 +923,51 @@ class BaseScene extends Phaser.Scene {
 
     }
 
-    showInstructionButtons(instr_string, sound, skipbuttons=false, key='pointerdown') {
+    showInstructionButtons(instr_string, sound, skipbuttons = false, key = 'pointerdown') {
         const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
+        const centerY = this.cameras.main.centerY - text_panel_h / 2;
+    
         return new Promise((resolve) => {
-            // Add replay button
-            //const centerX = this.cameras.main.centerX;
-            //this.subbutton =  this.add.sprite(centerX, 500, 'submit2').setOrigin(0.5).setInteractive();
-            const continueButton = this.add.sprite(centerX+200, 500, 'submit2').setOrigin(0.5).setInteractive();
-            continueButton.setDisplaySize(40, 40); // Adjust size as needed
-            //continueButton.preFX.addGlow(0x87CEFA); // Light blue glow
-
-            if (sound>0) {
-                // /replayButton.destroy()
-                const replayButton = this.add.sprite(centerX-200, 500, 'replay').setOrigin(0.5).setInteractive();
-                replayButton.setDisplaySize(40, 40); // Adjust size as needed
-                //replayButton.preFX.addGlow(0x87CEFA); // Light blue glow
-
-                // Play the instruction sound initially
-                const instructionSound = this.sound.add(instr_string, {volume: 1});
+            // Display subtitle
+            this.temp_txt = this.showSubtitle(instr_string);
+    
+            const continueButton = this.add.sprite(centerX + 200, 500, 'submit2').setOrigin(0.5).setInteractive();
+            continueButton.setDisplaySize(40, 40);
+    
+            if (sound > 0) {
+                const replayButton = this.add.sprite(centerX - 200, 500, 'replay').setOrigin(0.5).setInteractive();
+                replayButton.setDisplaySize(40, 40);
+    
+                const instructionSound = this.sound.add(instr_string, { volume: 1 });
                 instructionSound.play();
-
-                if (!instructionSound.isPlaying & skipbuttons==true) {
+    
+                if (!instructionSound.isPlaying && skipbuttons === true) {
                     replayButton.destroy();
                     continueButton.destroy();
-                    if (instructionSound.isPlaying) {
-                        instructionSound.stop();
-                    }
+                    if (instructionSound.isPlaying) instructionSound.stop();
+                    if (this.temp_txt) this.temp_txt.destroy(); // Cleanup subtitle
                     resolve();
                 }
-
-                // Replay button logic
+    
                 replayButton.on(key, () => {
-                    if (instructionSound.isPlaying) {
-                        instructionSound.stop(); // Stop any active sound
-                    }
-                    instructionSound.play(); // Play the audio
+                    if (instructionSound.isPlaying) instructionSound.stop();
+                    instructionSound.play();
                 });
-
+    
                 continueButton.on(key, () => {
-                    if (instructionSound.isPlaying) {
-                        instructionSound.stop();
-                    }
-                    // Remove both buttons
+                    if (instructionSound.isPlaying) instructionSound.stop();
                     replayButton.destroy();
                     continueButton.destroy();
-
+                    if (this.temp_txt) this.temp_txt.destroy(); // Cleanup subtitle
                     resolve();
                 });
             } else {
                 continueButton.on(key, () => {
-                // Remove both buttons
-                continueButton.destroy();
-
-                resolve();
-            });
-
+                    continueButton.destroy();
+                    if (this.temp_txt) this.temp_txt.destroy(); // Cleanup subtitle
+                    resolve();
+                });
             }
-            // Continue button logic
-            
         });
     }
 
