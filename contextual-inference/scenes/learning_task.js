@@ -688,13 +688,20 @@
         this.sendRatingsData(ratings3);
 
         for (let i = 0; i < 6; i++) { 
-            this.stimGrReal2.getChildren()[i].alpha=0;
-            this.stimGrReal2.getChildren()[i].disableInteractive()
+            this.stimGrReal3.getChildren()[i].alpha=0;
+            this.stimGrReal3.getChildren()[i].disableInteractive()
         }
 
         this.blinkStars(5000);
         this.spark.start()
         await this.moveAndShowEvee(400, 300, 200, true);
+
+        this.tweens.add({
+            targets: this.lvl4music,
+            volume: this.cfg.music_vol,
+            duration: 2500 // Original duration
+        });
+        
         this.waitFor(1000)
         this.createGentleMotion()
 
