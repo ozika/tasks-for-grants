@@ -671,6 +671,12 @@
         });
         await this.runTrials(cond[5]);
 
+        this.tweens.add({
+            targets: this.lvl4music,
+            volume: 0,
+            duration: 2500 // Original duration
+        });
+        
         i2_1.play();
         await this.waitFor(5500)
         let post_rating3 = await this.getStimClicks() 
@@ -696,12 +702,8 @@
         this.spark.start()
         await this.moveAndShowEvee(400, 300, 200, true);
 
-        this.tweens.add({
-            targets: this.lvl4music,
-            volume: this.cfg.music_vol,
-            duration: 2500 // Original duration
-        });
         
+
         this.waitFor(1000)
         this.createGentleMotion()
 
