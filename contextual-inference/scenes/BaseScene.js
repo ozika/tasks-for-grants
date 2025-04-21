@@ -644,6 +644,62 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
+    createVolumeControl(targetSound) {
+        const x = 770;
+        const y = 550;
+        const barWidth = 10;
+        const barHeight = 50;
+    
+        // Label
+        const label = this.add.text(x, y - 60, 'Volume', {
+            fontSize: '12px',
+            fontFamily: 'Arial',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+    
+        // Background bar
+        const bar = this.add.rectangle(x, y, barWidth, barHeight, 0x888888).setOrigin(0.5);
+    
+        // Draggable handle
+        const handle = this.add.rectangle(x, y - barHeight / 2, barWidth + 10, 10, 0xffffff).setInteractive({ useHandCursor: true });
+        this.input.setDraggable(handle);
+    
+        // Volume % text
+        const volText = this.add.text(x, y + 40, '100%', {
+            fontSize: '12px',
+            fontFamily: 'Arial',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+    
+        // Drag behavior
+        const dragCallback = (pointer, gameObject, dragX, dragY) => {
+            if (gameObject === handle) {
+                handle.y = Phaser.Math.Clamp(dragY, y - barHeight / 2, y + barHeight / 2);
+                const normalized = 1 - (handle.y - (y - barHeight / 2)) / barHeight;
+                const volume = Phaser.Math.Clamp(normalized, 0, 1);
+                targetSound.setVolume(volume);
+                volText.setText(`${Math.round(volume * 100)}%`);
+            }
+        };
+    
+        this.input.on('drag', dragCallback);
+    
+        // Return a control interface
+        return {
+            disable: () => {
+                handle.disableInteractive();
+                this.input.off('drag', dragCallback);
+            },
+            destroy: () => {
+                handle.destroy();
+                bar.destroy();
+                volText.destroy();
+                label.destroy();
+                this.input.off('drag', dragCallback);
+            }
+        };
+    }
+
     showOutcomeMarker(outcome) {
         return new Promise((resolve) => {
             console.log("inside showOutcomeMarker ")

@@ -64,7 +64,7 @@
         this.load.audio('lvl1', 'assets/sound/soundtrack/game_music1.mp3');
         this.load.audio('lvl2', 'assets/sound/soundtrack/chapter1_playlist.mp3');
         this.load.audio('lvl3', 'assets/sound/soundtrack/chapter2_playlist.mp3');
-        this.load.audio('lvl4', 'assets/sound/soundtrack/chapter2_playlist.mp3');
+        this.load.audio('lvl4', 'assets/sound/soundtrack/chapter3_playlist.mp3');
         this.load.audio('final_music', 'assets/sound/soundtrack/quirky_game_music.mp3');
 
         this.load.audio('buildup', 'assets/sound/effects/buildup.wav');
@@ -121,7 +121,7 @@
         this.cfg.ctx_alpha_peak = 1
         this.cfg.tar_alpha_baseline = 0.1
 
-        this.cfg.music_vol = 0.7
+        this.cfg.music_vol = 0.4
 
         this.cfg.evee_volume = 1
 
@@ -372,6 +372,7 @@
             this.lvl1music.stop();
         }
         this.lvl1music.play();
+        this.cv = this.createVolumeControl(this.lvl1music);
 
         // INITIAL WAIT
         await this.waitFor(2000);
@@ -396,6 +397,7 @@
             volume: 0.02,
             duration: 4000 // Original duration
         });
+        this.cv.destroy()
         await this.waitFor(3500)
                 
         console.log("training 1 completed")
@@ -459,10 +461,13 @@
                 });
 
                 this.lvl1music.play();
+                this.cv = this.createVolumeControl(this.lvl1music);
+                
 
 
                 this.waitFor(3000)
                 await this.runTrials(cond[1]);
+                this.cv.destroy();
 
                 this.tweens.add({
                     targets: this.lvl1music,
@@ -521,6 +526,7 @@
             this.lvl2music.stop();
         }
         this.lvl2music.play();
+        this.cv = this.createVolumeControl(this.lvl2music);
 
         await this.waitFor(1000)
         for (let i = 0; i < 6; i++) { 
@@ -536,6 +542,7 @@
         this.stimset = 2
         await this.runTrials(cond[2]);
 
+        this.cv.destroy(); 
         this.tweens.add({
             targets: this.lvl2music,
             volume: 0,
@@ -588,12 +595,14 @@
             this.lvl3music.stop();
         }
         this.lvl3music.play();
+        this.cv = this.createVolumeControl(this.lvl3music);
         await this.waitFor(5000); 
 
         this.stimset = 3
 
         await this.runTrials(cond[3]);
 
+        this.cv.destroy();
         this.tweens.add({
             targets: this.lvl3music,
             volume: 0,
@@ -650,11 +659,13 @@
             this.lvl4music.stop();
         }
         this.lvl4music.play();
+        this.cv = this.createVolumeControl(this.lvl4music);
         await this.waitFor(5000);
 
         this.stimset = 4
         await this.runTrials(cond[4]);
         //take the volume down
+        
         this.tweens.add({
             targets: this.lvl4music,
             volume: 0,
@@ -670,7 +681,7 @@
             duration: 2500 // Original duration
         });
         await this.runTrials(cond[5]);
-
+        this.cv.destroy();
         this.tweens.add({
             targets: this.lvl4music,
             volume: 0,
