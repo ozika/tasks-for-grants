@@ -5,10 +5,19 @@
     }
 
     init(data) {
-        this.m1 = data.m1;
-        this.m2 = data.m2;
-        this.m3 = data.m3;
-        this.schid = data.schid;
+        if (flag == "_test") {
+            this.m1 = "2";
+            this.m2 = "3";
+            this.m3 = "4";
+            this.schid = "3";
+        }
+        else {
+            this.m1 = data.m1;
+            this.m2 = data.m2;
+            this.m3 = data.m3;
+            this.schid = data.schid;
+        }
+        
         
     }
     
@@ -818,6 +827,7 @@
             for (let i = 0; i < this.notrials-1; i++) {
                 this.startMouseTrack()
                 this.trialData[this.tridx].t_trial_start = performance.now();
+                await this.showMouseStartAnchor();
 
                 // Reset gravity well and particle properties for each trial
                 this.darkwell.gravity = 30

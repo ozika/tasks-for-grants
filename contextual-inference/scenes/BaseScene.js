@@ -777,6 +777,33 @@ class BaseScene extends Phaser.Scene {
         });
     }
 
+    showMouseStartAnchor() {
+        return new Promise((resolve) => {
+            const centerX = this.cameras.main.centerX;
+            const centerY = 595; // y = 690–700
+    
+            // Create the red rectangle as a visual anchor
+            this.mouseStartRect = this.add.rectangle(centerX, centerY, 70, 30, 0xff0000)
+                .setDepth(1000)
+                .setInteractive();
+    
+            // Instruction text
+            const instrText = this.add.text(centerX, centerY - 30, 'Move cursor here to start', {
+                fontSize: '14px',
+                color: '#ffcccc',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5).setDepth(1000);
+    
+            // Set up detection when mouse moves into the rectangle
+            this.mouseStartRect.once('pointerover', () => {
+                this.mouseStartRect.destroy();
+                instrText.destroy();
+                this.mouseStartRect = null;
+                resolve();
+            });
+        });
+    }
+
     showText(text, x, y, size) {
         return new Promise((resolve) => {
              let txtobj = this.add.text(x, y, text, {
