@@ -336,6 +336,8 @@
 
         }
 
+        this.stimGroups = [this.stimGr, this.stimGrReal, this.stimGrReal2, this.stimGrReal3];
+
         // create gradient texture
         const sliderWidth = 300;
         const sliderHeight = 10;
@@ -374,6 +376,8 @@
 
     async runTask() {
         await this.fetchSubtitleScript("script.csv");
+
+        
 
         // SHARP START
         this.lvl1music = this.sound.add('lvl1', {volume: 0.8, loop: true});
@@ -798,7 +802,6 @@
     // Start trial and process stimuli sequence
     async runTrials(conf) {
             
-            
             var cond_name = "r"+conf.rel +"_"+conf.name+"_"+this.schid.toString()+conf.flag+this.flag
             this.cond_name = "r"+conf.rel +"_"+conf.name+conf.bl+"_"+this.schid.toString()+conf.flag+this.flag
             await this.fetchData("sch_"+cond_name+".csv")
@@ -824,9 +827,17 @@
             this.timing.isi1 = 1000
             this.timing.isi2 = 1000
 
+            
+
             for (let i = 0; i < this.notrials-1; i++) {
                 this.startMouseTrack()
                 this.trialData[this.tridx].t_trial_start = performance.now();
+
+                // recrod the current volume setting
+                const activeMusic = [this.lvl1music, this.lvl2music, this.lvl3music, this.lvl4music, this.fin].find(m => m && m.isPlaying);
+                this.trialData[this.tridx].music_volume = activeMusic ? activeMusic.volume : null;
+
+                // wait for the cursor to be moved to the anchor area
                 await this.showMouseStartAnchor();
 
                 // Reset gravity well and particle properties for each trial
@@ -968,27 +979,25 @@
 
                 }
                 
+
                 
+
+                if (this.trialData[this.tridx].questions == 1 ) {
+                    // Hide the stimuli for the rationg
+                    this.stimGroups[this.stimset - 1].getChildren().forEach(child => {
+                        child.alpha = 0;
+                    });
+
+                    // Gather questions (stress/energy etc)
+                    await this.gatherMentalStatus();
+                }
                 
 
                 // Change alpha back to baseline
-                if (this.stimset == 1) {
-                    this.stimGr.children.each((child) => {
-                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-                    });
-                } else if (this.stimset == 2) {
-                    this.stimGrReal.children.each((child) => {
-                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-                    });
-                } else if (this.stimset == 3) {
-                    this.stimGrReal2.children.each((child) => {
-                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-                    });
-                } else if (this.stimset == 4) {
-                    this.stimGrReal3.children.each((child) => {
-                        child.alpha = this.cfg.ctx_alpha_baseline; // Set alpha to baseline
-                    });
-                }
+                this.stimGroups[this.stimset - 1].getChildren().forEach(child => {
+                    child.alpha = this.cfg.ctx_alpha_baseline;
+                });
+
                  
                 
 

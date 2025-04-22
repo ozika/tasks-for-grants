@@ -782,24 +782,168 @@ class BaseScene extends Phaser.Scene {
             const centerX = this.cameras.main.centerX;
             const centerY = 595; // y = 690–700
     
-            // Create the red rectangle as a visual anchor
-            this.mouseStartRect = this.add.rectangle(centerX, centerY, 70, 30, 0xff0000)
-                .setDepth(1000)
-                .setInteractive();
+            const anchorWidth = 70;
+            const anchorHeight = 30;
     
-            // Instruction text
-            const instrText = this.add.text(centerX, centerY - 30, 'Move cursor here to start', {
-                fontSize: '14px',
-                color: '#ffcccc',
-                fontFamily: 'Arial'
-            }).setOrigin(0.5).setDepth(1000);
+            // Check if cursor is already within bounds
+            const pointer = this.input.activePointer;
+            const withinX = pointer.x > centerX - anchorWidth / 2 && pointer.x < centerX + anchorWidth / 2;
+            const withinY = pointer.y > centerY - anchorHeight / 2 && pointer.y < centerY + anchorHeight / 2;
     
-            // Set up detection when mouse moves into the rectangle
-            this.mouseStartRect.once('pointerover', () => {
-                this.mouseStartRect.destroy();
-                instrText.destroy();
-                this.mouseStartRect = null;
-                resolve();
+            if (withinX && withinY) {
+                // Briefly show and auto-resolve after 20ms
+                const tempRect = this.add.rectangle(centerX, centerY, anchorWidth, anchorHeight, 0xe74c3c)
+                    .setDepth(1000);
+                const tempText = this.add.text(centerX, centerY - 30, 'Move cursor here to start', {
+                    fontSize: '14px',
+                    color: '#ffcccc',
+                    fontFamily: 'Arial'
+                }).setOrigin(0.5).setDepth(1000);
+    
+                this.time.delayedCall(20, () => {
+                    tempRect.destroy();
+                    tempText.destroy();
+                    resolve();
+                });
+            } else {
+                // Create the red rectangle as a visual anchor
+                this.mouseStartRect = this.add.rectangle(centerX, centerY, anchorWidth, anchorHeight, 0xe74c3c)
+                    .setDepth(1000)
+                    .setInteractive();
+    
+                // Instruction text
+                const instrText = this.add.text(centerX, centerY - 30, 'Move cursor here to start', {
+                    fontSize: '14px',
+                    color: '#ffcccc',
+                    fontFamily: 'Arial'
+                }).setOrigin(0.5).setDepth(1000);
+    
+                // Set up detection when mouse moves into the rectangle
+                this.mouseStartRect.once('pointerover', () => {
+                    this.mouseStartRect.destroy();
+                    instrText.destroy();
+                    this.mouseStartRect = null;
+                    resolve();
+                });
+            }
+        });
+    }
+
+    async gatherMentalStatus() {
+        const questions = [
+            {
+                label: 'How stressed do you feel right now?',
+                min: 'Very calm',
+                max: 'Extremely stressed',
+                field: 'stress'
+            },
+            {
+                label: 'What is your current energy level?',
+                min: 'Zero energy',
+                max: 'Extremely energetic',
+                field: 'energy'
+            },
+            {
+                label: 'What is your current motivation level?',
+                min: 'Completely demotivated',
+                max: 'Extremely motivated',
+                field: 'motivation'
+            },
+            {
+                label: 'How irritated do you feel right now?',
+                min: 'Not at all',
+                max: 'Extremely irritated',
+                field: 'irritation'
+            }
+        ];
+    
+        const sliders = [];
+        const elementsToDestroy = []; // Collect all elements to clean up
+        const centerX = this.cameras.main.centerX;
+        const startY = 150;
+        const gapY = 110;
+        const sliderWidth = 400;
+        const sliderHeight = 5;
+    
+        for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+            const y = startY + i * gapY;
+    
+            elementsToDestroy.push(
+                this.add.text(centerX, y - 40, q.label, {
+                    fontSize: '16px',
+                    fontFamily: 'Arial',
+                    color: '#FFFFFF'
+                }).setOrigin(0.5)
+            );
+    
+            elementsToDestroy.push(
+                this.add.text(centerX - (sliderWidth / 2) - 100, y - 15, q.min, {
+                    fontSize: '15px',
+                    fontFamily: 'Arial',
+                    color: '#AAAAAA'
+                }).setOrigin(0, 0.5)
+            );
+    
+            elementsToDestroy.push(
+                this.add.text(centerX + (sliderWidth / 2) + 100, y - 15, q.max, {
+                    fontSize: '15px',
+                    fontFamily: 'Arial',
+                    color: '#AAAAAA'
+                }).setOrigin(1, 0.5)
+            );
+    
+            const line = this.add.rectangle(centerX, y, sliderWidth, sliderHeight, 0x999999).setDepth(-1);
+            line.setInteractive();
+            elementsToDestroy.push(line);
+    
+            const handle = this.add.sprite(centerX, y - 10, 'handle')
+                .setDisplaySize(30, 30)
+                .setInteractive()
+                .setDepth(1);
+            this.input.setDraggable(handle);
+            elementsToDestroy.push(handle);
+    
+            let valueText = this.add.text(centerX, y + 25, '50', {
+                fontSize: '16px',
+                fontFamily: 'Arial',
+                color: '#48e0fc'
+            }).setOrigin(0.5);
+            elementsToDestroy.push(valueText);
+    
+            let value = 50;
+    
+            const updateSlider = (xPos) => {
+                handle.x = Phaser.Math.Clamp(xPos, centerX - sliderWidth / 2, centerX + sliderWidth / 2);
+                const normalized = (handle.x - (centerX - sliderWidth / 2)) / sliderWidth;
+                value = Math.round(normalized * 100);
+                valueText.setText(value.toString());
+            };
+    
+            line.on('pointerdown', (pointer) => updateSlider(pointer.x));
+    
+            this.input.on('drag', (pointer, gameObject, dragX) => {
+                if (gameObject === handle) updateSlider(dragX);
+            });
+    
+            sliders.push({ field: q.field, getValue: () => value });
+        }
+    
+        const submitBtn = this.add.sprite(centerX, startY + gapY * questions.length, 'submit2')
+            .setDisplaySize(60, 60)
+            .setInteractive();
+        submitBtn.preFX.addGlow(0x5dade2);
+        elementsToDestroy.push(submitBtn);
+    
+        await new Promise((resolveSubmit) => {
+            submitBtn.once('pointerdown', async () => {
+                sliders.forEach(sl => {
+                    this.trialData[this.tridx][sl.field] = sl.getValue();
+                });
+    
+                elementsToDestroy.forEach(el => el.destroy());
+                await this.waitFor(1000); // 3 second pause after submission
+                resolveSubmit();
             });
         });
     }
