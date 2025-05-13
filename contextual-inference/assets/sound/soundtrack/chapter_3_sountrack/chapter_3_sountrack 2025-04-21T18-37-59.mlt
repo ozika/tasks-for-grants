@@ -236,10 +236,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">337820eb6d6d78c900e23363f7e2d9b0</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">muSimpleJoys.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter0" out="00:03:45.160">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -273,10 +271,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">0a18c959d5596ec37402474061d598de</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">muSpringBreeze.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter1" out="00:01:56.760">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -310,10 +306,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">1abc356c520987a7e87c099ff459d2cb</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">muDancingThroughLife.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter2" out="00:03:18.440">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -347,10 +341,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">379a67f9d9814e2a5398148d6aa72259</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">mySimpleDelights.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter3" out="00:01:08.960">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -384,10 +376,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">d6109e296b21f91d92e09375ef81ac49</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">mu_CosmicOdyssey.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter4" out="00:03:29.160">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -397,6 +387,26 @@
       <property name="shotcut:animOut">00:00:10.000</property>
     </filter>
   </chain>
+  <tractor id="tractor0" in="00:00:00.000" out="00:00:00.760">
+    <property name="shotcut:transition">lumaMix</property>
+    <track producer="chain10" in="00:01:08.200" out="00:01:08.960"/>
+    <track producer="chain11" in="00:00:00.000" out="00:00:00.760"/>
+    <transition id="transition0" out="00:00:00.760">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="factory">loader</property>
+      <property name="mlt_service">luma</property>
+      <property name="alpha_over">1</property>
+      <property name="fix_background_alpha">1</property>
+    </transition>
+    <transition id="transition1" out="00:00:00.760">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="start">-1</property>
+      <property name="accepts_blanks">1</property>
+      <property name="mlt_service">mix</property>
+    </transition>
+  </tractor>
   <chain id="chain12" out="00:02:41.480">
     <property name="length">00:02:41.520</property>
     <property name="eof">pause</property>
@@ -421,10 +431,8 @@
     <property name="shotcut:skipConvert">1</property>
     <property name="xml">was here</property>
     <property name="shotcut:hash">67893491f8c3364d2b5a07bb4aa86855</property>
-    <property name="ignore_points">0</property>
+    <property name="ignore_points">1</property>
     <property name="shotcut:caption">mu_CosmicWanderer.mp3</property>
-    <property name="shotcut:defaultAudioIndex">0</property>
-    <property name="vstream">-1</property>
     <filter id="filter5" out="00:02:41.480">
       <property name="window">75</property>
       <property name="max_gain">20dB</property>
@@ -434,9 +442,29 @@
       <property name="shotcut:animOut">00:00:10.000</property>
     </filter>
   </chain>
+  <tractor id="tractor1" in="00:00:00.000" out="00:00:00.080">
+    <property name="shotcut:transition">lumaMix</property>
+    <track producer="chain11" in="00:03:29.080" out="00:03:29.160"/>
+    <track producer="chain12" in="00:00:00.000" out="00:00:00.080"/>
+    <transition id="transition2" out="00:00:00.080">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="factory">loader</property>
+      <property name="mlt_service">luma</property>
+      <property name="alpha_over">1</property>
+      <property name="fix_background_alpha">1</property>
+    </transition>
+    <transition id="transition3" out="00:00:00.080">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="start">-1</property>
+      <property name="accepts_blanks">1</property>
+      <property name="mlt_service">mix</property>
+    </transition>
+  </tractor>
   <playlist id="playlist0">
-    <property name="shotcut:audio">1</property>
-    <property name="shotcut:name">A1</property>
+    <property name="shotcut:video">1</property>
+    <property name="shotcut:name">V1</property>
     <entry producer="chain7" in="00:00:00.000" out="00:03:45.160"/>
     <blank length="00:00:00.640"/>
     <entry producer="chain8" in="00:00:00.000" out="00:01:56.760"/>
@@ -444,24 +472,32 @@
     <entry producer="chain9" in="00:00:00.000" out="00:03:18.440"/>
     <blank length="00:00:01.280"/>
     <entry producer="chain10" in="00:00:00.000" out="00:01:08.160"/>
-    <blank length="00:00:00.800"/>
+    <entry producer="tractor0" in="00:00:00.000" out="00:00:00.760"/>
     <entry producer="chain11" in="00:00:00.800" out="00:03:29.040"/>
-    <blank length="00:00:00.120"/>
+    <entry producer="tractor1" in="00:00:00.000" out="00:00:00.080"/>
     <entry producer="chain12" in="00:00:00.120" out="00:02:41.480"/>
   </playlist>
-  <tractor id="tractor0" title="Shotcut version 25.03.29" in="00:00:00.000" out="00:16:22.080">
+  <tractor id="tractor2" title="Shotcut version 25.03.29" in="00:00:00.000" out="00:16:22.080">
     <property name="shotcut">1</property>
     <property name="shotcut:scaleFactor">0.107336</property>
     <property name="shotcut:projectAudioChannels">2</property>
     <property name="shotcut:projectFolder">1</property>
     <track producer="background"/>
-    <track producer="playlist0" hide="video"/>
-    <transition id="transition0">
+    <track producer="playlist0"/>
+    <transition id="transition4">
       <property name="a_track">0</property>
       <property name="b_track">1</property>
       <property name="mlt_service">mix</property>
       <property name="always_active">1</property>
       <property name="sum">1</property>
+    </transition>
+    <transition id="transition5">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="version">0.1</property>
+      <property name="mlt_service">frei0r.cairoblend</property>
+      <property name="threads">0</property>
+      <property name="disable">1</property>
     </transition>
   </tractor>
 </mlt>
